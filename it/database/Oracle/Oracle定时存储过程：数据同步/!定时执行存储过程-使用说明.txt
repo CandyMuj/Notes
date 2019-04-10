@@ -1,0 +1,100 @@
+-- 本说明最佳前提是当前登录用户为 towercrnop 若有未找到或其他类似的错误，请先检查当前登录人是否正确
+-- 这里是一些管理语句，看情况使用
+-- 打开服务 这个是用于命令窗口的
+set serveroutput on
+-- 查询当前配置表信息
+select * from timingrun_config;
+-- 查询作业队列中的所有作业状态
+select job,what,next_date,next_sec,failures,broken,interval from all_jobs;
+-- 查询触发器当前状态
+select trigger_name, status from user_triggers where trigger_name like 'TIMINGRUN_CONFIG%';
+-- 激活配置表所有触发器
+alter table timingrun_config enable all triggers;
+-- 禁用配置表所有触发器
+alter table timingrun_config disable all triggers;
+
+
+-- 配置表 timingrun_config
+
+-- 主键为 job （唯一且不为空）
+添加定时任务步骤：
+	1、创建存储过程，并且测试后无错，建议存储过程建立在towercrnop下（保持与配置表在同一用户下，其他用户没测试过是否可行，有可能会出现权限不足的情况）
+	2、在配置表中插入一条语句，建议以如下方式插入
+		begin
+			insert into timingrun_config values(null,'用户','存储过程名称','执行间隔周期',是否启用,'任务描述');
+			commit;
+		end;
+		/
+		说明：
+			null：不要改动这个参数
+			用户：填写存储过程所在用户 如：towercrnop
+			存储过程名称：就是存储过程的名称
+			执行周期间隔：这个是执行间隔是一个表达式 如：sysdate + 5/(24 * 60 * 60) 表示每隔5秒执行一次  具体格式见后方说明
+			是否启用：为int类型，枚举值[0,1] 0：禁用 1：激活
+			      注：第一次新增时，无论是否启用都会执行一次（按道理是这样，如果值为0有可能不会执行）
+修改任务步骤：
+	法一：
+		直接使用 select * from timingrun_config for update; 或 select a.rowid,a.* from timingrun_config a 进行修改更新
+		然后记得按照流程来 先执行语句->点锁->修改->点锁旁边的√(这个时候在oracle系统中的配置已经修改了，后方不要点回滚最好点提交事务，如果改错了再操作就行，或者先禁用 0)->再点锁->提交事务
+	法二：
+		如上方一样使用update语句，建议也使用如下写法 加上 begin...end;/
+		begin
+			update timingrun_config set broken = 1 where job = xxx;
+			commit;
+		end;
+		/
+	ps：对于修改操作job不允许更改，其他都可以修改
+删除任务步骤:
+	法一：
+		同修改中的法一类似  唯一不同：修改数据变为点锁后方的删除按钮-
+		先执行语句->点锁->点锁后方的删除按钮->点锁旁边的√(这个时候在oracle系统中的配置已经修改了，后方不要点回滚最好点提交事务，如果改错了再操作就行，或者先禁用 0)->再点锁->提交事务
+	法二：
+		同修改中的法二类似
+		begin
+			delete timingrun_config where job = xxx;
+			commit;
+		end;
+		/
+
+ps：
+	1、建议都使用法二的方式操作 begin...end;/ 这种方式
+	2、且建议在命令行中执行，因为可以看到打印的信息，在此之前要先在命令行执行 set serveroutput on 命令，才能看到打印的信息（没有出错的情况下 不强求必须这样操作）
+	3、执行完“增删改”操作完成后，若要确认oracle系统中的定时任务状态 可使用开头的语句 “查询作业队列中的所有作业状态”
+
+
+
+执行间隔表达式说明 （这个可以百度，下方列出一些常用的，举一反三一下就ok了，不支持具体的每隔多少天执行）
+	每天午夜12点                 　　　TRUNC(SYSDATE + 1) 
+	每天早上8点30分            　　　　TRUNC(SYSDATE + 1) + (8*60+30）/(24*60) 
+	每星期二中午12点           　　　　NEXT_DAY(TRUNC(SYSDATE ), 'TUESDAY') + 12/24
+	每个月第一天的午夜12点   　　      TRUNC(LAST_DAY(SYSDATE ) + 1) 
+	每月五号凌晨1点					 TRUNC(LAST_DAY(SYSDATE ) + 5)+1/24
+	每个季度最后一天的晚上11点  　　   TRUNC(ADD_MONTHS(SYSDATE + 2/24, 3 ), 'Q' ) -1/24 
+	每星期六和日早上6点10分      　　  TRUNC(LEAST(NEXT_DAY(SYSDATE, 'SATURDAY'), NEXT_DAY(SYSDATE, 'SUNDAY'))) + (6×60+10）/(24×60）
+	每3秒钟执行一次			   sysdate+3/(24*60*60)
+	每2分钟执行一次			   sysdate+2/(24*60)
+
+	1:每分钟执行
+	interval => sysdate+1/(24*60)  --每分钟执行  
+	interval => sysdate+1    --每天  
+	interval => sysdate+1/24   --每小时  
+	interval => sysdate+2/24*60 --每2分钟  
+	interval => sysdate+30/24*60*60  --每30秒  
+	2:每天定时执行  
+	Interval => TRUNC(sysdate+1)  --每天凌晨0点执行  
+	Interval => TRUNC(sysdate+1)+1/24  --每天凌晨1点执行  
+	Interval => TRUNC(SYSDATE+1)+(8*60+30)/(24*60)  --每天早上8点30分执行  
+	3:每周定时执行  
+	Interval => TRUNC(next_day(sysdate,'星期一'))+1/24  --每周一凌晨1点执行  
+	Interval => TRUNC(next_day(sysdate,1))+2/24  --每周一凌晨2点执行  
+	4:每月定时执行  
+	Interval =>TTRUNC(LAST_DAY(SYSDATE)+1)  --每月1日凌晨0点执行  
+	Interval =>TRUNC(LAST_DAY(SYSDATE))+1+1/24  --每月1日凌晨1点执行  
+	5:每季度定时执行  
+	Interval => TRUNC(ADD_MONTHS(SYSDATE,3),'q')  --每季度的第一天凌晨0点执行  
+	Interval => TRUNC(ADD_MONTHS(SYSDATE,3),'q') + 1/24  --每季度的第一天凌晨1点执行  
+	Interval => TRUNC(ADD_MONTHS(SYSDATE+ 2/24,3),'q')-1/24  --每季度的最后一天的晚上11点执行  
+	6:每半年定时执行
+	Interval => ADD_MONTHS(trunc(sysdate,'yyyy'),6)+1/24  --每年7月1日和1月1日凌晨1点  
+	7:每年定时执行  
+	Interval =>ADD_MONTHS(trunc(sysdate,'yyyy'),12)+1/24  --每年1月1日凌晨1点执行

@@ -1,0 +1,124 @@
+--隐式游标
+--%rowcount– SQL 语句影响的行数
+create table student( sno number, sname varchar2(20),sage number);
+insert into student values (1,'Tom',20); 
+insert into student values (2,'Kite',21); 
+insert into student values (3,'Bob',22); 
+insert into student values (4,'Jam',23); 
+
+create or replace procedure pro1
+is
+begin
+   update student set sage = sage + 5;
+   dbms_output.put_line('更新了'||sql%rowcount||'行数据');
+end;
+/
+
+--%found:SQL 语句影响了一行或多行时为 TRUE
+--%notfound:SQL 语句没有影响任何行时为TRUE
+--写一个过程，将大于某学号的数据进行更新，年龄+5。
+create or replace procedure pro1(no number)
+is
+begin
+   update student set sage = sage + 5 where sno > no;
+   if sql%found then
+      dbms_output.put_line('更新了'||sql%rowcount||'行数据');
+   else
+      dbms_output.put_line('没有更新数据！');
+   end if;
+end;
+
+--显示游标
+--例：依次输出student表的内容
+  SNO      SNAME                      SAGE
+---------- -------------------- ----------
+         1 Tom                          30
+         2 Kite                         31
+         3 Bob                          37
+         4 Jam                          38
+create or replace procedure pro1
+is
+cursor mycur is select * from student; --声明游标
+stu student%rowtype;
+begin
+  open mycur; --打开游标
+  fetch mycur into stu;  --从游标中取数据
+  while mycur%found loop
+      dbms_output.put_line('学号是'||stu.sno||'，姓名是：'||stu.sname);
+      fetch mycur into stu;
+  end loop;
+  close mycur; --关闭游标
+end;
+
+--带参数的显示游标
+--显示比输入学号大的学生信息
+create or replace procedure pro1(sno1 student.sno%type)
+is
+   stu1 student%rowtype;
+   cursor mycursor(input_no number) is select * from student where sno > input_no ; --声明游标
+begin
+   open mycursor(sno1);  --打开游标
+   fetch mycursor into stu1; --取数据
+   while mycursor%found loop
+       dbms_output.put_line('学号是'||stu1.sno||'，姓名是：'||stu1.sname);
+       fetch mycursor into stu1; --取数据
+   end loop;
+   close mycursor; --关闭游标
+end;
+/
+
+--显示游标：循环游标
+FOR <record_index> IN <cursor_name>
+LOOP
+	<executable statements>
+END LOOP;
+
+  SNO SNAME                      SAGE
+---------- -------------------- ----------
+         1 Tom                          30
+         2 Kite                         31
+         3 Bob                          37
+         4 Jam                          38
+create or replace procedure pro1
+is
+cursor mycur is select * from student; --声明游标
+stu student%rowtype;
+begin
+  for stu  in mycur
+  loop
+     dbms_output.put_line('学号是'||stu.sno||'，姓名是：'||stu.sname);
+  end loop; 
+end;
+
+--输出10号部门的员工编号和姓名 工资
+create or replace procedure pro1
+is
+cursor mycur is select * from emp where deptno = 10;
+nemp emp%rowtype;
+begin 
+   for nemp in mycur
+   loop
+     dbms_output.put_line(nemp.empno||'——'||nemp.ename||'——'||nemp.sal);
+   end loop;
+end;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

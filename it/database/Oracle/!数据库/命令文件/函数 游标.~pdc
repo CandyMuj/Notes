@@ -1,0 +1,97 @@
+--一个简单的游标定义 定义行对象类型
+declare
+cursor cur
+is select * from emp;
+v_row emp%rowtype;
+begin
+  open cur;
+  fetch cur into v_row;
+  dbms_output.put_line(v_row.ename||'-'||v_row.empno||'...');
+  close cur;--关闭后，结果集中的数据不能做任何操作，也就是cur不能做他的任何操作，包括读取数据都不行
+end;
+
+--定义单个属性的类型
+declare
+cursor cur is select job,hiredate from emp;
+v_job emp.job%type;
+v_hiredate emp.hiredate%type;
+begin
+  open cur;
+  fetch cur into v_job,v_hiredate;
+  dbms_output.put_line(v_job||'-'||v_hiredate||'...');
+  close cur;
+end;
+
+--游标中的loop
+declare
+cursor cur is select job,hiredate from emp;
+v_job emp.job%type;
+v_hiredate emp.hiredate%type;
+begin
+  open cur;
+  loop
+    fetch cur into v_job,v_hiredate;
+    exit when cur%notfound;--退出循环放到使用之前，因为如果第一次就没有数据的话也就不执行了，如果放在后面，第一次没有数据，打印语句也要执行一次
+    --不能放到最上面，他的顺序是第一次就执行退出，cur这时还没有查找所有不知道有没有值，所有就认为有，然后才fetch
+    --下一次循环才知道没有记录，退出循环
+    --如果放在下面就是，loop然后查询值，有就加入，没有也会记录状态，执行退出，有没有数据，有的话已经加入了，没有就会退出循环
+    dbms_output.put_line(v_job||'-'||v_hiredate||'...');
+  end loop;
+  close cur;
+end;
+
+--更简单的迭代结果集,不需要定义变量,打开和关闭游标都没有
+declare
+cursor cur is select job,hiredate from emp;--也可以是select * from emp;将返回的数据备份或者说快照到游标cur中
+begin
+  for curr in cur--将游标中的数据放到cur中 并迭代循环出来 点的属性就是游标快照时的字段属性，一般都是表的字段
+    loop
+      dbms_output.put_line(curr.job||'-'||curr.hiredate||'...');
+    end loop;
+end;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

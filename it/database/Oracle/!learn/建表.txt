@@ -1,0 +1,41 @@
+要求：自己创建一个用户，并且给用户分配一个表空间，把表建在该表空间里面，往表里插入数据
+
+建表
+1、创建一个表空间user1.
+ create tablespace user1 datafile 'e:\test\user1_data.dbf' size 20M;
+2、创建用户xb并把user1非配给xb
+create user xb identified by xb123 dafault tablespace user1;
+3、给用户赋权限（登陆，建表）
+登陆：grant connect to xb;
+建表：grant create table to xb;
+
+4、用户xb登陆并建表
+create table class
+    (class_id number,
+     class_name varchar2(20),
+     class_loc varchar2(20)
+    );
+5、往表里插入数据
+ insert into 表 values (字段1，字段2);
+ insert into class values (1,'14软件三','9投影');
+显示：ORA-01950: 对表空间 'USER1' 无权限
+6、给表空间user1分配配额
+alter user 用户 quota 10M on 表空间名;
+alter user 用户 quota unlimited on user1;
+Grant unlimited tablespace to 用户；
+grant unlimited tablespace to xb;
+
+
+添加字段：alter table class add (class_xx char(5));
+修改字段：alter table class modify (class_xx varchar2(5));
+删除字段：alter table class drop column class_xx;
+
+查看所有用户默认的表空间：
+select username,default_tablespace from dba_users;
+
+
+
+
+
+
+

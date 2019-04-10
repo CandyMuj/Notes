@@ -1,0 +1,168 @@
+分组函数
+max(),min(),avg(),sum(),count()
+nvl处理null的函数
+nvl(comm,0)
+ 
+字符函数
+◆lower(char) 将字符串表达式char中的所有大写字母转换为小写字母  
+◆upper(char) 将字符串表达式char中的所有小写字母转换为大写字母  
+◆initcap(char) 将首字母变大写
+◆substr(char,start,length) 返回字符串表达式char中从第start开始的length个字符 
+◆length(char) 返回字符串表达式char的长度
+◆replace(char1,search_string,replace_string)
+select replace(ename,'S','我是小白') from emp;
+
+◆instr(char1,char2,[,n[,m]])取子串在父字符串的位置
+select instr('big big tiger','big') from dual;
+select instr('big big tiger','big',2) from dual;
+select instr('big big tiger','big',1,2) from dual;
+
+1、将所有员工的姓名按小写的方式显示
+
+2、将所有员工的姓名按大写的方式显示
+
+3、显示正好为5个字符的员工的姓名
+select ename from emp where length(ename)=5;
+
+4、显示所有员工姓名的前三个字符
+select substr(ename,1,3) from emp;
+
+5、以首字母大写的方式显示所有员工的姓名
+select initcap(ename) from emp;
+
+6、以首字母小写的方式显示所有员工的姓名
+select lower(substr(ename,1,1))||substr(ename,2,length(ename)-1)result from emp;
+
+
+select instr('big big tiger','big') from dual;
+select instr('big big tiger','big',2) from dual;
+select instr('big big tiger','big',1,2) from dual;
+
+数学函数
+◆  round(n,[m]) 该函数用于执行四舍五入,如果省掉m，则四舍五入到整数;如果m是正数,则四舍五入到小数点的m位后.如果m是负数,则四舍五入到小数点的m位前
+1、select round(2479.584) from dual; //2480
+2、select round(2479.584,2) from dual;//2479.58
+3、select round(2479.584,-2) from dual;//2500
+4、select round(avg(sal),1) from emp;
+
+◆ trunc(n,[m]) 该函数用于截取数字.如果省掉m，就截去小数部分,如果m是正数就截取到小数点的m位后,如果m是负数,则截取到小数点的前m位
+select trunc(2073.25,-1) from dual;
+select trunc(avg(sal),1) from emp;
+
+◆  mod(m,n)求余
+ select mod(5,2) from dual;
+ select mod(4,2) from dual;
+
+◆  floor(n) 返回小于或是等于n的最大整数 （向下取整）
+ select floor(21.01) from dual;  //21
+ select floor(-21.01) from dual;//-22
+◆  ceil(n)  返回大于或是等于n的最小整数（向上取整）
+ select ceil(21.01) from dual; //22  
+  select ceil(-21.01) from dual;//-21
+
+？显示在一个月为30天的情况所有员工的日薪金,忽略小数.
+ select ename, trunc(sal/30) from emp;
+
+ 
+
+
+日期函数
+◆sysdate 系统日期
+select sysdate from dual;
+◆add_months(d,n)将日期加上特定月份
+?查找已经入职8个月多的员工
+select  * from emp where sysdate>=add_months(hiredate,8);
+◆last_day(d):返回指定日期所在月份的最后一天
+select last_day(sysdate) from dual;
+select last_day(to_date('2015/07/01','yyyy/mm/dd')) from dual;
+
+
+
+?找出各月倒数第3天受雇的所有员工
+select * from emp where hiredate=(last_day(hiredate)-2);
+
+?显示满10年服务年限的员工的姓名和受雇日期.
+select ename,hiredate from emp where sysdate>=add_months(hiredate,120);
+
+?对于每个员工,显示其加入公司的天数.
+select ename,trunc(sysdate-hiredate) "入司天数" from emp;
+
+转换函数
+to_date
+to_char
+查询1980年入司的员工
+select ename, hiredate from scott.emp where to_char(hiredate,'yyyy')=1980;
+查询每年9月份入司的员工
+select ename, hiredate from scott.emp where to_char(hiredate,'mm')=9;
+
+将sal改成小数点2位并加上千分隔
+select ename, to_char(sal,'99,999.99') from scott.emp
+select ename, to_char(sal,'L99,999.99') from scott.emp;
+select ename, to_char(sal,'$99,999.99') from scott.emp;
+系统函数
+sys_context
+
+运算表达式
+1、5+3
+select 5+3 from dual;
+2、逻辑运算符 < > <= >= <> !=  and  or  not
+3、like, in, between...and, distinct
+4、位运算bitand
+select bitand(159,100) from dual;
+111010101
+000110110
+000010100
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

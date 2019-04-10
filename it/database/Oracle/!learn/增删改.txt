@@ -1,0 +1,24 @@
+alter session set nls_date_format='yyyy-mm-dd';
+临时修改日期格式
+null空值
+0
+不破坏原表的情况下，创建一个和emp一样的新表，不可移植到sql
+create table my_emp as select * from emp;
+更新数据：
+where 表示过滤的条件
+UPDATE 	tbl_name??? 
+	SET col_name1=expr1 [, col_name2=expr2 ...]?? ?
+	[WHERE where_definition]
+把部门30的所有员工sal加上200
+update my_emp set sal=sal+200 where deptno=30;
+将20部门的所有上级改成7839，并且所有工资提升10%
+update my_emp set mgr=7839, sal=sal+sal*0.1 where deptno=20;
+删除数据：
+delete from 表
+delete from 表 where 条件
+delete from my_emp where ename='FORD' or ename='JAMES' OR DEPTNO=10;
+删除表:
+drop table 表名
+
+
+

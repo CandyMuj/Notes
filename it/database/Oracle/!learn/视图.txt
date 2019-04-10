@@ -1,0 +1,88 @@
+1、概念
+视图是一个虚拟表，其内容由查询定义。同真实的表一样，视图包含一系列带有名称的列和行数据。但是，视图并不在数据库中以存储的数据值集形式存在。行和列数据来自由定义视图的查询所引用的表，并且在引用视图时动态生成。
+
+2、视图与表的区别
+①表需要占用磁盘空间，视图不需要
+②视图不能添加索引
+③使用视图可以简化 复杂查询 
+比如:学生选课系统
+④视图用于提高安全性	
+比如:不同用户查看不同视图
+
+3、创建视图
+create view 视图名 as select。。。
+
+4、创建或修改视图
+create or replace view 视图名 as select。。。
+
+5、删除视图
+drop view 视图名
+
+6. 视图的应用
+（1）关系视图
+     最常用的视图，它的输出可以看做一个虚拟的表，该表的数据是由其他数据表提供的，由于它不存储真正的数据，因此占用数据库资源少。
+
+   a、利用emp表创建
+    create or replace view vw_emp as select empno, ename, hiredate, mgr from emp 
+    create or replace view vw_emp1 as select deptno, count(empno) cc from emp group by deptno ;
+
+--查询部门名和部门人数
+--内嵌视图
+select d.*, c.c
+from (select deptno, count(deptno) c from emp group by deptno)c,dept d
+where c.deptno=d.deptno
+
+
+--关系视图（使用频繁）
+create or replace view vw_count
+as
+select deptno, count(deptno) c from emp group by deptno;
+
+--将视图作为一张表使用
+select d.*, c.c
+from vw_count c,dept d 
+where c.deptno=d.deptno；
+
+   b、视图的增删改查
+   select * from user_updatable_columns where table_name = 'VW_EMP';
+
+   1）给视图增加内容 
+   insert into vw_emp(empno, ename, mgr) values (1111,'xiaobai',7782);
+   再查看视图和原表的情况
+
+   2）给视图更新内容    
+   update vw_emp set ename='xiaohei' where ename='xiaobai';
+   再查看视图和原表的情况
+
+   with check option的使用
+???思考如果在emp表中添加empno=1111，ename=xiaobai，并创建一个empno只有1111的员工信息，如果emp表1111的信息改成了2222，那么视图是否会受到影响?
+ insert into emp(empno, ename) values (1111,'xiaobai');
+ create or replace view vw_emp2 as select * from emp where empno=1111;
+ update emp set empno=2222 where empno=1111;
+ select * from vw_emp2;--发现没有信息了
+ 修改：
+ create or replace view vw_emp as select * from emp where empno=1111 with check option;
+ update vw_emp set empno=2222 where empno=1111;
+ 显示ORA-01402: 视图 WITH CHECK OPTION where 子句违规
+
+   3）给视图删除内容   
+   delete from vw_emp where ename = 'xiaohei';
+   再查看视图和原表的情况
+
+   4）用视图进行各种查询操作
+   例:利用视图vw_emp1和dept表查询部门人数和部门名称
+   select v.deptno, v.cc, d.dname  from vw_emp1 v, dept d where v.deptno=d.deptno;
+
+（2）内嵌视图：被嵌套在查询语句中
+例1：
+列出在部门“SALES”（销售部）工作的员工的姓名，假定不知道销售部的部门编号。
+select ename from (select deptno from dept where dname='SALES') a,emp
+where a.deptno = emp.deptno;
+例2：
+列出所有“CLERK”办事员的姓名及其部门名称，部门的人数。
+   select e.ename,d.dname,dc.c
+   from emp e,dept d,
+    (
+     select deptno,count(empno) c from emp group by deptno
+     ) dc
+   where e.job='CLERK' and e.deptno=d.deptno and d.deptno=dc.deptno

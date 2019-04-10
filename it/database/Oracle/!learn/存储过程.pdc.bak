@@ -1,0 +1,213 @@
+--过程参数的三种模式：
+--IN(重点)
+用于接受调用程序的值
+默认的参数模式
+--OUT
+用于向调用程序返回值 
+--IN OUT
+用于接受调用程序的值，并向调用程序返回更新的值
+
+create or replace procedure 过程名字(变量名 in 数据类型) 
+/*pro1过程名,in 代表输入类型，可以省略不写
+变量名指的是键盘输入的变量,
+数据类型不能写成varchar2(20)，不能出现具体的精度,写成vaechar2*/
+is | as  --is或者as 随便用其一
+ 声明变量;
+ ...
+begin
+   dml;
+exception
+   例外处理
+end;
+
+--调用过程
+exec 过程名（输入参数）;
+
+
+
+2输入一个雇员的编号,如果其工资高于3500,则显示高工资,
+工资大于2000,则显示中等工资,小于2000则显示低工资
+
+create or replace procedure pro1(no number)
+is
+  Nsal emp.sal%type;
+begin
+  select sal into Nsal from emp where empno = no;
+  if Nsal>3500 then
+    dbms_output.put_line('高工资');
+  elsif Nsal>2000 then
+    dbms_output.put_line('中等工资');
+  else
+    dbms_output.put_line('低工资');
+  end if;
+end;
+/
+--调用过程
+exec pro1(7369);  --sql*plus pl/sql developer
+call pro1(7369);
+
+3 输入一个雇员编号,根据他所在的部门涨工资,规则:
+10部门上涨10%;
+20部门上涨20%;
+30部门上涨30%;
+所在部门的上涨工资,最大不能超过5000,超过工资只为5000;
+
+create or replace procedure pro2(no emp.empno%type)
+is
+  Ndeptno emp.deptno%type;
+  Nsal emp.sal%type;
+begin
+  select deptno into Ndeptno from emp where empno=no;
+  if Ndeptno=10 then
+     update emp set sal=sal*1.1 where empno=no;
+  elsif Ndeptno=20 then
+     update emp set sal=sal*1.2 where empno=no;
+  elsif Ndeptno=30 then
+     update emp set sal=sal*1.3 where empno=no;
+  else
+    null;
+  end if;
+  select sal into Nsal from emp where empno=no;
+  if Nsal>5000 then
+     update emp set sal=5000 where empno=no;
+  else 
+     null;
+  end if;
+  commit;
+exception
+  when no_data_found then
+  dbms_output.put_line('not find that empno');
+end;
+/
+
+写一个存储过程，任意输入一个行数，输出n行n个*：
+*
+**
+***
+****
+*****
+******
+...
+create procedure pro3(i number)
+is
+  a varchar2(50);
+begin
+  a := '';
+  for j in 1..i loop
+    a := a || '*';
+    dbms_output.put_line(a);
+  end loop;
+end;
+/
+
+--调用存储过程，完成向emp表插入
+empno   ename    sal
+1000    xiaobai  10000
+create or replace procedure pro1(no emp.empno%type,name emp.ename%type,nsal emp.sal%type)
+is
+begin
+   insert into emp(empno,ename,sal) values (no,name,nsal);
+   commit;
+end;
+/
+
+create or replace procedure pro2 (i out number)
+as
+begin
+   i := 20;
+   dbms_output.put_line(i);
+end;
+/
+
+create procedure pro6
+is
+   k number;
+begin
+   pro2(k);
+end;
+/
+
+create or replace procedure pro3(p1 in out number, p2 in out number)
+is
+  v_temp number;
+begin
+  v_temp := p1;
+  p1 := p2;
+  p2 := v_temp;
+end;
+/
+
+declare
+  num1 number := 10;
+  num2 number := 20;
+begin
+  pro3(num1, num2);
+  dbms_output.put_line('num1' || num1);
+  dbms_output.put_line('num2' || num2);
+end;
+/
+--例1：输入雇员名和新工资，修改雇员原来的工资。
+create or replace procedure pro1(name emp.ename%type, nsal emp.sal%type)
+as
+begin
+  update emp set sal = nsal where ename = name;
+  commit;
+end;
+/
+--例2：建一个过程，根据部门号输出部门员工所在地和部门名称，
+如果部门号不存在，显示‘您输入的部门编号不存在，请从新输入，谢谢！’
+create or replace procedure pro1(no dept.deptno%type)
+as
+name varchar2(20);
+dloc varchar2(20); 
+begin
+  select dname, loc into name, dloc from dept where deptno = no;
+  dbms_output.put_line('部门是：'||name||' 所在地是：'||dloc);  
+exception
+  when no_data_found then
+  dbms_output.put_line('您输入的部门编号不存在，请重新输入，谢谢！');  
+end;
+/
+
+/*例3:建立一个存储过程，在emp表中给按雇员号指定的人员增加工资,
+如果工资大于2000则增加50，
+否则如果工资大于1000则增加100，
+否则增加150。*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+

@@ -1,0 +1,33 @@
+--创建存储过程 修改test表中工资最低的三个人的工资加1000
+create or replace procedure pro
+as
+begin
+  update test set sal=sal+1000 where empno in
+  (select empno from 
+     (select * from test order by sal asc)
+     where rownum<4 
+  );
+  commit;
+end;
+
+--根据姓名返回编号
+create or replace procedure pro_id(t_name in test.ename%type,t_id out test.empno%type,tt OUT test.Job%TYPE)--只要定义了这个out，这就是定义了一个变量就是存储返回值的，执行以后通过变量接收就好
+as
+begin
+  select empno into t_id from test where ename =t_name;
+  SELECT job INTO tt FROM TEST WHERE ename =t_name;
+  dbms_output.put_line(t_id||'...'||tt);
+  dbms_output.put_line('---------------');
+  dbms_output.put_line(empno||'...'||job);
+  dbms_output.put_line('---------------');
+end;
+
+--调用
+declare
+t_idd test.empno%type;
+jj test.Ename%TYPE;
+begin
+  pro_id('SMITH',t_idd,jj);--对于out返回的参数，只能用变量来填充，先定义变量，然后该过程的返回值将初始化给这个变量t_idd
+  dbms_output.put_line(t_idd||'==='||jj);
+end;
+

@@ -1,0 +1,199 @@
+--函数
+create [or replace] function 函数名(输入参数 数据类型) return 数据类型 --数据类型不能有精度，是数据库的类型
+is|as 
+  声明变量 数据类型;
+  ...
+begin
+  ...
+  return 结果;
+exception
+  例外处理;
+end [函数名];
+
+--写一个函数，功能是输出'hello，world！'
+create or replace function fun1 return varchar2
+is
+begin
+   return 'hello，world！';
+end fun1;
+
+
+--使用函数
+select fun1 from dual;
+
+create or replace procedure pro1
+is
+  a varchar2(50);
+begin
+  a := fun1;
+  dbms_output.put_line(a);
+end;
+
+create or replace procedure pro1
+is
+begin
+  dbms_output.put_line(fun1);
+end;
+
+--创建一个函数，输入两个数，求这两个数的和
+create or replace function fun1(num1 number, num2 number) return number
+is
+a number;
+begin
+  a := num1 + num2;
+  return a;
+end;
+/
+--已经执行了下面语句
+create table  分数表 (no number(3), name varchar2(10), score number(3));
+
+insert into   分数表  values (1,'张一', 56);
+insert into   分数表 values(2,'张二', 82);
+insert into   分数表 values  (3,'张三', 90);
+insert into   分数表 values  (4,'张四', 82);
+insert into   分数表 values  (5,'张五', 90);
+--要求：创建一个函数，可以接受用户输入的学号，得到该学生的名次，并输出这个名次。
+  NO NAME       SCORE
+---- ---------- -----
+   1 张一          56
+   2 张二          82
+   3 张三          90
+   4 张思          82
+   5 张武          90
+
+create or replace function fun1(sno number) return number
+is 
+s1 number;
+s2 number;
+begin
+  select score into s1 from 分数表 where no = sno;
+  select count(*) into s2  from 分数表 where score > s1;
+  s2 := s2 + 1;
+  return s2;
+end fun1;
+/
+
+
+
+create or replace procedure pro1(name varchar2)
+is
+    Njob emp.job%type;
+begin
+  select job into Njob from emp where ename=name;
+if Njob='CLERK' then
+  update emp set sal=sal+500 where ename=name;
+elsif Njob='SALESMAN' then
+  update emp set sal=sal+1000 where ename=name;
+elsif Njob='ANALYST' then
+  update emp set sal=sal+1500 where ename=name;
+else
+   update emp set sal=sal+2000 where ename=name;
+end if;
+exception
+  when no_data_found then
+  dbms_output.put_line('not find that empno');
+end;
+/
+
+--包
+--第一步：创建包规范(package)
+create or replace package pack is 
+procedure pro1(name varchar2);
+function fun1(sno number) return number;
+end;
+
+--第二步：创建包体( package body)
+create or replace package body pack is --package body包体
+procedure pro1(name varchar2)
+is
+    Njob emp.job%type;
+begin
+  select job into Njob from emp where ename=name;
+if Njob='CLERK' then
+  update emp set sal=sal+500 where ename=name;
+elsif Njob='SALESMAN' then
+  update emp set sal=sal+1000 where ename=name;
+elsif Njob='ANALYST' then
+  update emp set sal=sal+1500 where ename=name;
+else
+   update emp set sal=sal+2000 where ename=name;
+end if;
+exception
+  when no_data_found then
+  dbms_output.put_line('not find that empno');
+end;
+function fun1(sno number) return number
+is 
+s1 number;
+s2 number;
+begin
+  select score into s1 from 分数表 where no = sno;
+  select count(*) into s2  from 分数表 where score > s1;
+  s2 := s2 + 1;
+  return s2;
+end fun1;
+end;
+
+exec pack.pro1('SMITH');
+select pack.fun1(2) from dual;
+
+create or replace pro1(no number)
+is
+a emp%rowtype;
+begin
+  select * from a where deptno = no;
+  dbms_output.put_line(a.ename);
+end;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

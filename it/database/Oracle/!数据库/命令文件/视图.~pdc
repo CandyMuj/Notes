@@ -1,0 +1,9 @@
+--简单视图的创建 这个视图显示empno在7300-7700之间的数据
+create or replace view view_demo
+as
+select EMPNO,ENAME,JOB,HIREDATE,SAL from test where empno between 7300 and 7700
+with read only;--添加只读权限，只能读，不能操作修改数据 ORA-42399: 无法对只读视图执行 DML 操作
+
+select constraint_name,table_name,r_owner,r_constraint_name
+from user_constraints
+where table_name='EMP';

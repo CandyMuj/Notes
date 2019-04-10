@@ -1,0 +1,69 @@
+--添加内容（insert）
+insert into 表名[(字段1，字段2...)] values (字段1的内容，字段2的内容...)
+create table stu(
+id number primary key,
+name varchar2(10),
+sex char(2) default '女' check(sex = '男' or sex = '女'),
+birthday date 
+);
+
+--日期格式'12-1月-2016'
+--更改日期格式: alter session set nls_date_format='yyyy-mm-dd';
+
+insert into stu(id, name, sex, birthday) values (1,'小柏','男','12-1月-2016');
+--select * from stu; 查询表内容
+insert into stu values (1,'小柏','男','12-1月-2016');
+/*如果表中所有的字段都要插入内容，stu后面的字段名可以省略不写，values后面的内容
+按原表字段的顺序写*/
+
+insert into stu(id, name,sex) values (3,'小柏','男');
+
+--总结
+1、插入的数据应与字段的数据类型相同。
+2、数据的大小应在列的规定范围内，例如：不能将一个长度为80的字符串加入到长度为40的列中。
+3、在values中列出的数据位置必须与被加入的列的排列位置相对应。
+4、字符和日期型数据应包含在单引号中。
+5、插入空值，不指定或insert into table value(null)
+
+--修改内容(update)
+update 表名 set 修改的内容 where 修改的条件
+
+例：update stu set sex = '女';/*修改所有的性别为 ‘女’*/
+    
+    update stu set sex = '女',name = '小狗' where id = 1;
+
+--修改含有null值的数据( is null )
+   update emp set comm = 0 where comm = null; --error
+   update emp set comm = 0 where comm is null;
+
+
+--删除内容（delete)
+delete from 表名  where 删除的条件;
+
+delete from stu where id = 1 and name = '小狗';
+
+create table emp1 as select * from emp;//复制emp表
+
+--删除emp1表中job是MANAGER 或者 CLERK 的员工
+
+delete from emp1 where job = 'MANAGER' or job = 'CLERK';
+/*
+注意：
+     删除带有英文的条件时，区分大小写
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,43 @@
+14.	列出所有员工的姓名、部门名称和工资
+select ename,dname,sal from emp a,dept b where a.deptno=b.deptno;
+
+1、列出薪金比SMITH高的所有员工
+select * from emp where sal>(select sal from emp where ename='SMITH');
+
+4.	列出受雇日期早于其直接上级的所有员工的编号，姓名，部门名称
+select a.empno,a.ename,a.hiredate,c.dname from emp a,emp b,dept c where a.mgr=b.empno and a.deptno=c.deptno and a.hiredate<b.hiredate;
+
+7.	列出最低薪金大于1500的各种工作及从事此工作的全部雇员人数
+select job,min(sal),count(ename) from emp a group by job having min(sal)>1500;;
+
+9.	列出薪金高于公司平均薪金的所有员工，所在部门，上级领导，公司的等级工资
+select a.ename,dname,aa.ename "Leader" ,grade
+from emp a,dept b,emp aa,salgrade s
+where a.deptno=b.deptno and a.mgr=aa.empno and 
+a.sal>(select avg(sal) from emp)
+and a.sal between losal and hisal;
+
+10.	列出与SCOTT从事相同工作的所有员工的编号，姓名，职位及其部门名称
+select empno,ename,job,dname from emp a,dept b where  a.deptno=b.deptno and job=(select job from emp where ename='SCOTT');
+
+12.	列出薪金高于在部门30工作的所有员工的薪金的员工姓名、薪金和部门名称
+select ename,sal,dname from emp a,dept b where a.deptno=b.deptno and sal>all(select sal from emp where deptno=30);
+19.	查出某个员工的上级主管，并要求出这些主管中的薪水超过3000
+select  a.ename,b.ename,b.sal "boss sal" from emp a,emp b where a.mgr=b.empno and b.sal>=3000;
+
+列出薪金高于公司平均薪金的所有员工，所在部门，上级领导，公司的工资等级.
+  第一步：显示工资高于平均薪金的员工姓名，部门编号
+  select e.ename,e.deptno
+  from emp e
+  where sal>(select avg(sal) from emp)
+  第二步：显示上级领导、公司的工资等级
+  select e.ename,d.dname,m.ename,s.grade
+  from emp e,dept d,emp m,salgrade s
+  where e.sal>(select avg(sal) from emp) 
+  and e.deptno=d.deptno
+  and m.mgr=e.empno
+  and e.sal between s.losal and hisal
+
+15．列出从事同一种工作但属于不同部门的员工的一种组合。
+select a.* from emp a,emp b
+where a.job=b.job and a.deptno<>b.deptno;

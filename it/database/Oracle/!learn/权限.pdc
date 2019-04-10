@@ -1,0 +1,31 @@
+--1、创建用户（注意创建用户只能在管理员下面创建）
+语法：create user 用户名 identified by 密码;
+
+--2、权限
+分为系统权限和对象权限
+    --系统权限：.它用于控制用户可以执行的一个或是一组数据库操作，
+比如：登陆数据库（create session）
+    --对象权限：对数据库具体对象（表，过程，约束等等）的操作。
+比如：建表 create table
+      查看表 select
+   
+    --角色：许多权限的集合
+    
+--3、赋权限（注：管理员下面赋权限）
+grant 权限/角色  to 用户；
+例：让小白这个用户登陆数据库
+第一步创建用户：create user xiaobai identified by x123;
+第二步赋予登陆权限：grant create session to xiaobai;
+              //或者 grant connect to xiaobai;
+              
+如果想让小白查看scott的emp表(注：管理员或者scott本人赋权限)
+grant select on scott.emp  to xiaobai;
+grant all on scott.emp  to xiaobai;
+
+--4、回收权限（注：管理员下面操作）
+revoke 权限/角色  from 用户；
+//回收系统权限：revoke create session from xiaobai;
+//回收对象权限：revoke select on scott.emp from xiaobai;
+
+--5、删除用户（注：管理员下面操作）
+drop user 用户名;

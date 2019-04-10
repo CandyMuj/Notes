@@ -1,0 +1,33 @@
+--隐式游标
+--%ROWCOUNT – SQL 语句影响的行数
+create or replace procedure pro1
+is
+begin
+  update student set sage = sage + 5;
+  dbms_output.put_line('更新了'||sql%rowcount||'行记录');
+end;
+
+--%FOUND – SQL 语句影响了一行或多行时为 TRUE
+create or replace procedure pro2
+is
+begin
+   update student set sage = sage + 5 where sno > 2;
+   if sql%found then
+      dbms_output.put_line('更新了'||sql%rowcount||'行记录');
+   else
+      dbms_output.put_line('没有更新记录');
+   end if;
+end;
+
+--%NOTFOUND – SQL 语句没有影响任何行时为TRUE
+/*练习：根据存储过程输入的姓名和编号更新student表，将输入编号的那个学生，改成输入的新姓名
+ 如果该学生找到，输出‘更新成功’,否则输出‘未找到该学生’*/
+ 
+        SNO SNAME                      SAGE
+---------- -------------------- ----------
+         1 Tom                          25
+         2 Kite                         26
+         3 Bob                          32
+         4 Jam                          33
+      
+       if sql%found then 

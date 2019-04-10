@@ -1,0 +1,229 @@
+declare
+  变量 数据类型()；
+begin
+  ...
+exception
+  when ... then
+  ...
+end;
+/
+
+/*
+if 条件 then 
+   结果;
+elsif 条件 then 
+   结果;
+elsif 条件 then 
+   结果;
+...
+else 
+  结果;
+end if;
+*/
+练习：输入一个数字，判断如果>10，显示‘此数大于10！’，
+如果<5,显示‘此数小于5！’，否则，显示‘此数介于5-10之间！’
+declare
+  n number := &no;  --ok
+
+declare
+  n number;
+begin
+  n := & no;--ok
+  
+declare
+  n number;
+  n := &no;  --error
+begin
+
+
+declare
+  n number := &no; 
+begin
+  if n > 10 then
+    dbms_output.put_line('此数大于10！');
+  elsif n < 5 then
+    dbms_output.put_line('此数小于5！');
+  else   
+    dbms_output.put_line('此数介于5-10之间！');
+  end if;  --注意：end if； 不能忘了
+end;
+/
+
+--case... when...then..else...end;
+Declare
+      outgrade varchar2(20);
+Begin
+       outgrade := case   '&grade'
+              when 'A'  then  '优秀'
+              when 'B'  then  '良好'
+              when 'C'  then  '中等'
+              when 'D'  then  '及格'
+              when 'E'  then  '不及格'
+              else        '没有此成绩'
+      end;
+      dbms_output.put_line(outgrade);
+End;
+
+--循环
+循环控制的三种类型：
+LOOP   -   无条件循环
+WHILE  -  根据条件循环
+FOR  -  循环固定的次数
+
+1、loop循环
+ 
+格式:
+Loop
+  循环的语句；
+exit when 终止条件;
+  循环的条件必须更改;
+end loop;
+
+--循环输出1-10；
+declare
+  n number := 1;
+begin
+  loop
+    dbms_output.put_line(n);
+    n := n + 1;
+  exit when n > 10;
+  end loop;
+end;
+
+2、while循环
+
+格式：
+while 判断循环的条件 loop
+ 循环语句;
+ 循环条件改变;
+end loop;
+
+--循环输出1-10；
+declare
+  n number := 1;
+begin
+  while n < 11 loop
+    dbms_output.put_line(n);
+    n := n + 1;
+  end loop;
+end;
+/
+
+
+3、for循环(游标配合使用)
+
+格式:
+for 变量名 in 变量的初始值..结束值 loop
+  循环语句;
+end loop;
+
+--循环输出1-10；
+declare
+  n number;
+begin
+  for n in 1..10 loop
+    dbms_output.put_line(n);
+  end loop;
+end;
+
+--输出：
+*
+**
+***
+****
+*****
+******
+
+declare
+  a varchar2(20);
+begin
+   a := '';
+   for j in 1..6 loop
+      a := a || '*';
+      dbms_output.put_line(a);
+   end loop;
+end;
+/  
+
+1.某公司要根据雇员的职位来加薪，公司决定按下列加薪结构处理：               
+---------------------
+Designation    Raise                            
+Clerk          500               
+Salesman       1000                
+Analyst        1500               
+Otherwise      2000  
+---------------------
+编写一个程序块,接受一个雇员姓名，从emp表中实现上述加薪处理。
+declare
+  Njob emp.job%type;
+  nename emp.ename%type;
+begin
+  nename := '&雇员名';
+  select job into Njob from emp where ename = nename;
+  if Njob = 'CLERK' then
+     update emp set sal = sal + 500 where ename = nename;
+  elsif Njob = 'SALESMAN' then
+     update emp set sal = sal + 1000 where ename = nename;
+  elsif Njob = 'ANALYST' then
+     update emp set sal = sal + 1500 where ename = nename;   
+  else 
+      update emp set sal = sal + 2000 where ename = nename;    
+  end if;
+end;
+/  
+--三、goto无条件跳转语句
+ 
+declare
+  i number:=1;
+begin
+  loop 
+   dbms_output.put_line('输出i='||i);
+   if i=10 then
+   goto end_loop;
+   end if;
+   i:=i+1;
+  end loop;
+  <<end_loop>> --<<两个小于符号 ,>>两个大于符号，不是书名号
+  dbms_output.put_line('循环结束');
+end;     
+
+--四、null
+null语句不会执行任何操作，直接将控制传递到下一条语句。
+declare
+v_sal emp.sal%type;
+v_ename emp.ename%type;
+begin
+ select ename, sal into v_ename, v_sal from emp where empno=&no;
+if v_sal < 3000 then
+  update emp set comm = sal * 0.1 where ename = v_ename;
+else
+  null;
+end if;
+end;
+     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

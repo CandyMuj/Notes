@@ -1,0 +1,197 @@
+方案里面的对象
+1、表
+2、约束constraint
+主键：用于唯一标示某一些列
+特点：1、唯一
+      2、not null
+需要说明的是:一张表最多只能有一个主键,但是可以有多个unqiue约束。
+1、 create table stu(id number constraint pk_id primary key,sex char(2));
+2、查看约束信息
+select table_name, constraint_name, constraint_type,status from user_constraints where table_name='STU';
+3、create table stu1(id number primary key,sex char(2));
+4、怎么在没有建主键约束的情况下在现有的表上添加
+  create table stu2(id number,sex char(2));
+  alter table stu2 add primary key(id)
+5、删除主键约束
+   alter table stu2 drop primary key[cascade];
+ 通用用法： alter table stu2 drop consraint 约束名
+
+6、禁用主键
+   alter table stu1 disable primary key;
+7、恢复主键
+   alter table stu1 enable primary key;
+   恢复主键时注意逐渐字段下面的内容不能重复。
+8、重命名约束名
+   alter table 表名 rename constraint 原名 to 目标名
+
+外键foreign key
+用于定义主表和从表之间的关系.外键约束要定义在从表上，主表则必须具有主键约束或是unique约束.,当定义外键约束后，要求外键列数据必须在主表的主键列存在或是为null
+ (1)创建外键约束 
+ create table stu(id number constraint pk_id primary key,sex char(2));
+ 两种方法：
+ 列级定义:create table grade(grade number,id number [constraint fk_grade] references stu(id));
+ 表级定义:create table grade1(
+         grade number,
+         id number,
+         [constraint fk_grade] foreign key(id) references stu(id)
+         ); 
+ (2)在已有的表上添加外键约束
+  create table grade(grade number,id number);
+  alter table grade add constraint fk_grade foreign key(id) references stu(id);
+ (3)删除外键
+  alter table grade drop constraint fk_grade;
+ 
+  创建表练习
+  stu表
+  sno, ssex, sname
+  create table stu(
+  sno number primary key,
+  ssex char(2),
+  sname varchar2(20)
+  );
+ 
+  teacher表
+  tno, tsex, tname
+  create table teacher(
+  tno number primary key,
+  tsex char(2),
+  tname varchar2(20)
+  ); 
+  grade表
+  grade,sno,tno
+  create table grade(
+  grade number(4,1),
+  sno number references stu(sno),
+  tno number references teacher(tno)
+  );
+ 
+3、default  默认值
+  create table stu1(sno number primary key,
+  ssex char(2) default(男));--()在sql中可以，在oracle中不可以写，换成单引号‘’
+  ssex char(2) default‘男’)  
+  
+  插入内容时
+  insert into stu1 values (1,''); --error
+  insert into stu1 values (1,default);
+  insert into stu1(sno) values (3);
+
+4、unique唯一
+   与primary key的区别在于unique可以为null
+   create table stu2(sno number primary key,
+   ssex char(2) default '男',
+   email varchar2(30) unique
+   sid char(18) unique
+   );
+
+5、check 在一定的范围以内
+   要求年龄必须在18-25岁之间
+    create table stu3(sno number primary key,
+   ssex char(2) default '男',
+   email varchar2(30) unique,
+   sid char(18) unique,
+   sage number check (sage between 18 and 25)
+   );
+
+6、not null
+   create table stu3(sno number primary key,
+   ssex char(2) default '男',
+   email varchar2(30) unique,
+   sid char(18) unique,
+   sage number check (sage between 18 and 25),
+   address varchar2(50) nul null
+   );
+
+现有一个商店的数据库，记录客户及其购物情况，由下面三个表组成：
+
+商品goods（商品号goodsId，商品名goodsName，单价unitprice，商品类别category，供应商provider);
+create table goods(
+goodsId number primary key,
+goodsName varchar2(20),
+unitprice number(10,2) check(unitprice>0),
+category varchar2(20),
+provider varchar2(50));
+
+客户customer（客户号customerId,姓名name,住址address,电邮email,性别sex,身份证cardId);
+create table customer(
+customerId number primary key,
+name varchar2(20) not null,
+address varchar2(20),
+email varchar2(20) unique,
+sex char(2) default '男' check(sex in ('男','女')),
+cardId char(18));
+
+
+购买purchase（客户号customerId,商品号goodsId,购买数量nums);
+create table purchase(
+customerId number references customer(customerId),
+goodsId number references goods(goodsId),
+nums number check(nums between 1 and 30));
+
+
+
+请用SQL语言完成下列功能：
+1 建表，在定义中要求声明：
+(1)每个表的主外键；
+(2)客户的姓名不能为空值；
+   nou null
+(3)单价必须大于0，购买数量必须在1到30之间；
+   单价unitprice check(unitprice>0)
+   购买数量nums 
+(4)电邮不能够重复;
+   email unique
+(5)客户的性别必须是 男 或者 女,默认是男
+
+
+--增加商品名也不能为空
+  alter table goods modify goodsName not null;--注意不为空not null使用modify
+--增加身份证也不重复
+  alter table customer add unique (cardId);
+--增加客户的住址只能是‘海淀’、‘朝阳’、‘东城’、‘西城’、‘通州’、‘崇文’
+  alter table customer add check(address in ('海淀','朝阳','东城'));
+
+
+
+
+   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

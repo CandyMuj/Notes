@@ -1,0 +1,211 @@
+--pl/sql程序段 只有执行部分的结构
+BEGIN
+    dbms_output.put_line('hello 你好');
+END;
+
+--包含声明和执行体
+declare
+a number(8,2);
+begin
+  a:=10;
+  dbms_output.put_line('a='||a);
+ end;
+ 
+--查询出empno为7369的名字，并输出
+declare
+name varchar2(10);
+begin
+  select ename into name
+  from emp
+  where empno=7369;
+  dbms_output.put_line('编号为7369 的员工姓名是'||name);
+end;
+
+--对上述添加异常处理
+declare
+name varchar2(10);
+begin
+  select ename into name
+  from emp
+  where empno=7369;
+  dbms_output.put_line('编号为7369 的员工姓名是'||name);
+  
+  exception
+    when NO_DATA_FOUND then
+      dbms_output.put_line('没有数据');
+    when TOO_MANY_ROWS then
+      dbms_output.put_line('查询出多条记录');
+end;
+
+--定义一个定长数组，并且循环迭代
+declare
+type numm is varray(4) of number(2);
+abc numm;
+begin
+  abc := numm(2,3,4,5,8);
+  for i in 1..abc.count
+    loop
+      dbms_output.put_line(abc(i));
+    end loop;
+end;
+
+
+declare    
+type v_table is table of varchar2(30) index by binary_integer;     
+--类型可以是前面的类型定义，index by binary_integer子句代表以符号整数为索引，     
+--这样访问表类型变量中的数据方法就是“表变量名(索引符号整数)”。     
+my_table v_table;     
+begin    
+      for i in 1..20     
+     loop     
+          my_table(i):=i;     
+          dbms_output.put_line(my_table(i));     
+      end loop;     
+end; 
+
+
+--------
+begin
+  for i in 1..30
+    loop
+      dbms_output.put_line('i='||i);
+      end loop;
+      dbms_output.put_line('循环结束，输出了从1到30的所有数字');
+end;
+
+--普通的loop循环语句
+declare
+m_num number(8) :=-10;
+begin
+  loop
+    dbms_output.put_line('n_num='||m_num);
+    m_num :=m_num+1;
+    exit when m_num >10;
+  end loop;
+     dbms_output.put_line('循环结束,输出-10到10之间的数');
+end;
+
+--求范围内的值的和
+declare
+sum_ number(8) := 0; --求和的这个变量，必须初始化，否则无聊怎么循环，结果都是空
+begin
+  for i in 6..10 --虽然说官方说这个i是循环计数器，记录循环次数的，但是实际是记录的每一次循环后循环出的值
+    loop
+      sum_ :=sum_+i;
+      end loop;
+      dbms_output.put_line('和是：'||sum_);
+end;
+
+
+--建立了一个stu表
+--如果学生的id不存在就创建，存在了，就提示已经存在
+declare
+v_id stu.s_id%type;
+begin
+  select s_id into v_id from stu where s_id =1;
+  dbms_output.put_line('此id已存在 id='||v_id); 
+  /*
+  为什么这里不用判断是否存在，存在就输出存在，因为如果不存在的话，就会在执行查询语句后报异常，NO_DATA_FOUND，
+  发生异常后后面的语句都不会执行了，这是常理，如果找到了就不会有错，才会执行后面的语句，找到了就说明已存在，执行后面的语句没有问题
+  当然，异常的语句虽然也在后面，但是必须要发生异常才会执行，并不是说后面的所有语句，也要看有效的语句才会执行
+  */
+  
+  exception
+    when no_data_found then
+      --没有找到数据，说明此id不存在，就添加一个
+       dbms_output.put_line('没有数据 将添加数据');
+       insert into stu(s_id,s_name,s_sex,s_age) values(1,'孤狼','男',19);
+       commit;
+    when too_many_rows then
+       dbms_output.put_line('查询出多条记录');
+end;
+
+
+--根据输入的empno查询信息    输入数据使用到&
+declare
+v_num emp.empno%type :='&empno';
+valu emp%rowtype;
+begin
+  select * into valu from emp where empno =v_num;
+  dbms_output.put_line(valu.ename);
+end;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

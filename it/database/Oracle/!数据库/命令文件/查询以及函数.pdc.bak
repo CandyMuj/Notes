@@ -1,0 +1,97 @@
+
+select avg(sal) "平均工资",deptno "部门编号" from emp group by deptno;
+
+
+select avg(e.sal) "平均工资",e.deptno "部门编号",d.dname "部门名称" 
+from emp e,dept d 
+where e.deptno = d.deptno 
+group by e.deptno;
+
+--查询每个部门的名称编号和平均工资
+select avg(e.sal) "平均工资",e.deptno "部门编号",(select dname from dept where deptno=e.deptno) "部门名称"
+from emp e,dept d 
+where e.deptno = d.deptno 
+group by e.deptno;
+
+--左外查询
+select ename,dname from emp left join dept on emp.deptno=dept.deptno;
+
+--显示工资低于2000，部门平均工资低于1000的部门号和部门平均工资
+select deptno,avg(sal)
+from emp
+where sal<2000
+group by deptno
+having avg(sal)<1000;
+
+--表达式匹配函数
+ select ename,decode(sign(sal-1000),1,'大于一千',-1,'<1000',0,'等于零') from emp;
+ --sign 内的表达式大于0返回1，小于0返回-1，等于0返回0
+
+--模糊查询
+select * from system_privilege_map where name like 'CREATE%';
+
+-------------------------------函数--------------------------------------------
+--创建函数 查询员工的工资，如果低于一千就加500工资，高于两千就减少1000工资
+--使用复制的test表（错误的示例）
+create or replace function demo
+(v_empno in number)
+return number
+is
+v_sal test.sal%type;
+begin
+  select sal into v_sal from test where empno =v_empno;
+  if v_sal<1000 then
+    update test set sal=v_sal+500 where empno=v_empno;
+    --函数是不能用来操作数据库的，也就是说更改数据库的数据是不允许的
+    --会报错 ORA-14551: 无法在查询中执行 DML 操作
+    return(v_sal+500);
+  elsif v_sal>2000 then
+    update test set sal=v_sal-1000 where empno=v_empno;
+    return(v_sal-1000);
+   end if;
+end;
+      
+--改正后
+create or replace function demo
+(v_empno in number)
+return number
+is
+v_sal test.sal%type;
+begin
+  select sal into v_sal from test where empno =v_empno;
+  if v_sal<1000 then
+    return(v_sal+500);
+  elsif v_sal>2000 then
+    return(v_sal-1000);
+   end if;
+end;
+
+
+--使用return返回只能是一个参数，当有多个数据时需要用out输出类型
+--查询出工资大于1000的所有员工姓名
+create or replace function demo
+(v_name out test.ename%type)
+return number
+is
+begin
+  select ename into v_name from test where empno=7369;
+  return 1;
+end;
+--调用函数要获取out参数的值，只能以如下方式
+declare
+v_name test.ename%type;
+v_val number;
+begin
+  v_val := demo(v_name);--此函数执行完以后返回的是1 由v_val接收 将函数赋值给一个变量就是接收函数的return值，每个函数必须要有返回值，并且每次只能返回一个参数
+                        --当返回一个值不够时，就可以用一个out再返回其他参数，但是接收就不是这样赋值了，是在调用函数的时候，将一个定义好的变量放到out的位置上，这个不是传入值，使用这个变量接收这个值
+                        --然后输出这个参数就好了
+                        --return是通过赋值接收参数（当然赋值到哪个变量，这个变量也必须要定义，这是必须的，要用就必须要定义这个变量，否则就是未定义），out是通过将定义的变量放到函数的位置上接收
+  dbms_output.put_line(v_val);
+  dbms_output.put_line(v_name);
+end;
+
+
+ 
+
+
+

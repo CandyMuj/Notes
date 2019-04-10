@@ -1,0 +1,376 @@
+1、触发器
+    当用户登陆/退出或操作某个数据对象，或进行DDL（建表，建库，建视图等等）引起某个存储过程的值，把这个隐含被调用的过程称为触发器。
+
+2、触发器的分类
+dml（insert, delete,update）触发器(重点)
+ddl(create,drop,atler)触发器
+系统事件触发器(与系统相关的触发器，比如用户登录，退出，启动数据库，关闭数据库)；
+
+
+
+—————————————————————————————————————————
+一、dml 触发器  表，12个触发器，32KB
+--语法：
+
+create [or replace] trigger trigger_name
+{before|after}
+{insert|delete|update[of column...]}
+on[schema]table_name
+[for each row]--行级触发，如果不写默认就是语句触发
+[when condition]
+begin
+trigger_body;
+end;
+
+(1)在emp添加一条数据的时候，提示‘添加了一条数据’
+
+create or replace trigger tri1
+after insert on
+scott.emp
+begin
+dbms_output.put_line('添加了一条数据');
+end;
+
+(2)在emp修改了多条数据的时候，提示‘多次修改了数据’
+
+create or replace trigger tri2
+after update on
+scott.emp
+begin
+dbms_output.put_line('修改了一条数据');
+end;
+
+执行操作：
+SQL>update emp set sal=sal+10;
+修改了一条记录
+14 rows update
+
+发现只提示了一条记录
+
+原因是默认的语句级触发器，认为所有的是一句触发操作，修改成行级触发操作（for each row）
+create or replace trigger tri2
+after update on
+scott.emp
+for each row--行级触发器
+begin
+dbms_output.put_line('修改了一条数据');
+end;
+
+执行操作：
+ 
+SQL> update emp set sal=sal+10;
+ 
+修改了一条数据
+修改了一条数据
+修改了一条数据
+修改了一条数据
+修改了一条数据
+修改了一条数据
+修改了一条数据
+修改了一条数据
+修改了一条数据
+修改了一条数据
+修改了一条数据
+修改了一条数据
+修改了一条数据
+修改了一条数据
+ 
+14 rows updated
+
+(3)before语句触发器
+例如：为了禁止工作人员在休息日改变员工信息，开发人员可以建立before语句触发器，从而实现数据的安全。
+
+create or replace trigger tri3
+before delete on
+scott.emp
+begin
+  if to_char(sysdate, 'day') in ('星期日','星期六') then
+  dbms_output.put_line('周末不能删除员工！');
+  raise_application_error(-20001,'周末不能删除员工！');
+  end if;
+end;
+
+说明：
+--raise_application_error(-20001,'周末不能删除员工！')是oracle提供的一个过程,可以传入两个参数。
+--error_number_in【自定义】从-20000到-20999之间，这样就不会与oracle的任何错误代码发生冲突。
+--error_msg_in【自定义】长度不能超过2K，否则截取2K。
+
+procedure raise_application_error(error_number_in in number,error_msg_in in varchar2)'
+
+
+执行操作
+SQL> delete from emp where empno=1234;
+ 
+周末不能删除员工！
+ 
+delete from emp where empno=1234
+ 
+ORA-20001: 周末不能删除员工！
+ORA-06512: 在 "SCOTT.TRI3", line 4
+ORA-04088: 触发器 'SCOTT.TRI3' 执行过程中出错
+
+（4）使用条件谓词,精确提示用户的操作。
+   当触发器中同时包含多个触发事件（insert,update,delete）时，为了在触发器代码中区分具体的触发事件，可以使用三个条件
+inserting
+updating
+deleting
+
+使用条件谓词来精确提示用户的操作。
+为了禁止工作人员在休息日改变员工信息，开发人员可以建立before触发器，从而实现数据的安全，在给出提示时，明确提示用户是进行的insert,update还是delete的操作。
+
+
+create or replace trigger tri1
+before 
+insert or update or delete on
+scott.emp
+for each row
+begin
+case
+  when inserting then
+   if (to_char(sysdate,'day')='星期三') then 
+   dbms_output.put_line('不要添加!');
+   raise_application_error(-20000,'不要添加!');
+   end if;
+  
+  when updating then
+   if (to_char(sysdate,'day')='星期三') then 
+   dbms_output.put_line('不要更新!');
+   raise_application_error(-20000,'不要更新!');
+   end if;
+   
+  when deleting then
+   if (to_char(sysdate,'day')='星期三') then 
+   dbms_output.put_line('不要删除!');
+   raise_application_error(-20000,'不要删除!');
+   end if;
+end case;
+end;
+
+(5)使用:old和:new
+  当触发器被触发时，要使用被插入、更新或删除的记录中的列值，有时要使用操作前、后列的值。
+:new 修饰符访问操作完成后列的值
+:old 修饰符访问操作完成前列的值
+
+特性   insert    update     delete
+old    null       有效	     有效
+new    有效	  有效       null
+
+例：在修改emp表雇员的薪水时，显示雇员工资修改前和修改后的值；
+    如何确保修改员工的工资不能低于原有工资；
+
+create or replace trigger tri5
+before  update on
+scott.emp
+for each row
+begin
+  if :new.sal<:old.sal then
+  dbms_output.put_line('工资不能低于原来工资');
+  raise_application_error(-20005,'工资不能低于原来工资');
+  else
+  dbms_output.put_line('原来工资是'||:old.sal||'现在的工资'||:new.sal);
+  end if;
+end;
+
+练习：
+--编写一个触发器，保证当用户在删除表emp记录的时候，自动把删除的记录备份到另外一张表emp_bak中。
+
+--创建emp_bak表结构
+create table myemp(
+id number,
+name varchar2(50)
+);
+
+create or replace trigger tri6
+before delete on
+scott.emp
+for each row
+begin
+  insert into myemp(id,name) values (:old.empno, :old.ename);
+end;
+
+--编写一个触发器如何控制员工的新工资不能低于原来的工资，同时也不能高出原来工资的20%。
+create or replace trigger tri5
+before update on
+scott.emp
+for each row
+begin
+  if (:new.sal<:old.sal or :new.sal>:old.sal*1.2) then
+  dbms_output.put_line('工资不在允许的范围内!');
+--阻止执行
+  raise_application_error(-20010,'工资不在允许的范围内!');
+  end if;
+end; 
+
+--编写一个触发器，阻止把小于18岁的用户增加到emp1表中。
+-1、创建emp1表
+create table emp1(
+id number,
+name varchar2(20),
+birthday date);
+
+-2、创建触发器
+create or replace trigger tri7
+before insert on
+scott.emp1
+for each row
+begin
+  if add_months(:new.birthday,18*12)>sysdate then
+  dbms_output.put_line('童工!');
+--阻止执行
+  raise_application_error(-20011,'童工!');
+  end if;
+end;
+
+-3、测试：
+insert into emp1 values (1,'xiaobai',to_date('2000-1-1','yyyy-mm-dd'));
+
+——————————————————————————————————————————————
+————————————————————————————————————————————
+
+二、系统触发器
+   系统触发器主要是针对oracle事件的触发器。如用户登录（logon logoff）数据库的启动或关闭等等。
+注意：由系统管理员完成的.
+ 
+——常用的属性函数：
+ora_client_ip_address //返回客户端的ip
+ora_database_name //返回数据库名
+ora_login_user //返回登录用户名
+ora_sysevent //返回触发触发器的系统事件名
+ora_des_encrypted_password //返回用户des（md5）加密后的密码
+
+--基本语法：
+create or replace trigger tri_name
+after[before] logon[logoff] on database
+begin
+--执行语句；
+end;
+
+--案例
+
+ 1、在sys下先创建一张新表log_table
+   create table log_table(
+   username varchar2(20), --登录的用户名
+   logon_time date, --登录时间
+   logoff_time date, --退出时间
+   address varchar2(20)  --登录ip
+   );
+
+ 2、创建登录触发器
+ create or replace trigger tri8
+ after logon on database
+ begin
+ insert into log_table(username,logon_time,address) 
+ values(ora_login_user,sysdate,ora_client_ip_address);
+ end;
+
+ 3、创建退出触发器
+ create or replace trigger tri9
+ before logoff on database
+ begin
+ insert into log_table(username,logoff_time,address) 
+ values(ora_login_user,sysdate,ora_client_ip_address);
+ end;
+
+--测试，在sys下测试
+select * from log_table;
+select username, to_char(logoff_time,'yyyy-mm-dd hh24:mi:ss') from log_table;
+_________________________________________________________________________________________
+
+三、ddl触发器
+  ddl触发器只要是记录oracle中的create，drop,alter操作。
+
+--语法：
+create or replace trigger 触发器名
+after ddl on 方案名.schema
+begin
+--执行语句;
+end;
+
+--案例：编写一个触发器，可以记录某个用户进行的ddl操作
+
+ 1、创建一张表
+create table my_ddl(
+event varchar2(64),  --create，alter，drop事件
+username varchar2(64), --用户名
+ddl_time date          --用户操作的时间
+);
+ 
+ 2、创建触发器
+create or replace trigger tri10
+after ddl on scott.schema
+begin
+ insert into my_ddl values(ora_sysevent,ora_login_user,sysdate);
+end;
+
+3、测试
+ 在scott下创建一张表，在sys登录的下面查看my_ddl表中是否有记录。
+_________________________________________________________________________________________
+
+四、管理触发器
+ 
+注意：使用管理员登录
+
+1、禁止触发器
+
+alter trigger 触发器名 disable;
+
+2、激活触发器
+
+alter trigger 触发器名 enable;
+
+3、禁止或激活表的所有触发器
+
+alter table 表名 disable all triggers;
+alter table 表名 enable all triggers;
+
+4、删除触发器
+drop trigger 触发器名;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 

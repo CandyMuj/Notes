@@ -1,0 +1,19 @@
+1、建索引的目的。
+加快查询速度
+2、分类
+单列索引
+create index index_name on table(columnname)
+SQL>create index index_emp on emp(ename);
+查看索引
+SQL>select index_name,index_type,status from user_indexes where table_name='EMP';
+复合索引
+create index index_name on table(columnname,columnname)
+SQL>create index index_emp1 on emp(ename,job);
+3、删除索引
+drop index index_emp1;
+4、创建原则
+(1)大表上建，where子句或连接条件上经常引用的列。
+(2)不适合建的有：很少或从不引用的字段；逻辑型的字段，如男或女(是或否)等。
+5、索引的缺点
+(1)建立索引，系统要占用大约为表的1.2倍的硬盘和内存空间来保存索引。
+(2)更新数据的时候，系统必须要有额外的时间来同时对索引进行更新，以维持数据和索引的一致性。

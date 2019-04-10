@@ -1,0 +1,342 @@
+循环
+1、
+loop
+循环语句；
+exit when 条件
+修改
+end loop；
+
+2、
+while 条件 loop
+循环语句;
+循环条件;
+end loop;
+
+3、
+for 变量名 in 1..n loop
+循环语句;
+end loop;
+
+条件：
+if...then...end if;
+
+if...then
+elsif...then
+else
+null;
+end if
+
+goto
+null
+
+对象：过程（存储过程） ，函数， 包， 触发器
+游标
+
+1、过程:
+create [or replace] procedure sp_name[(参数名 参数类型)] is/as
+--procedure过程单词,参数类型不要写具体的值number(7,2),varchar2(20),括号里面的内容不写，只写类型%type %rowtype
+局部变量；
+begin
+ exception
+ when... then...;
+end;
+
+2、调用的方法：
+ exec sp_name();
+ call sp_name();
+
+例1：创建一个过程,输入雇员名和新工资，修改雇员原来的工资。
+create procedure sp_pro1(Nname emp.ename%type,Nsal emp.sal%type) is
+begin
+  update emp set sal=Nsal where ename=Nname;
+end;
+
+例2：建一个过程，根据部门号输出部门员工所在地和部门名称，如果部门号不存在，显示‘您输入的部门编号不存在，请从新输入，谢谢！’
+create or replace procedure sp_pro1(dno dept.deptno%type) as
+dloc dept.loc%type;
+dna  dept.dname%type;
+begin
+  select loc, dname into dloc, dna from dept where deptno=dno;
+  dbms_output.put_line(dloc||dna);
+exception 
+when no_data_found then
+dbms_output.put_line('您输入的部门编号不存在，请从新输入，谢谢！');
+end;
+
+
+例3：建立一个存储过程，在emp表中给按雇员号指定的人员增加工资,如果工资大于2000则增加50，否则如果工资大于1000则增加100，否则增加150。
+create or replace procedure sp_pro1(Nempno emp.empno%type) is
+v_sal emp.sal%type;
+begin
+  select sal into v_sal from emp where empno=Nempno;
+  if v_sal>2000 then
+  update emp set sal=v_sal+50 where empno=Nempno;
+  elsif v_sal>1000 then
+  update emp set sal=v_sal+100 where empno=Nempno;
+  else
+  update emp set sal=v_sal+150 where empno=Nempno;
+  end if;
+end;
+
+二、函数
+1、概念
+   用于返回特定的数据，当建立函数时，在函数头部必须包含return子句。而在函数体内必须包含return语句返回的数据。
+   使用CREATE FUNCTION来建立函数。
+create or replace function nx(No number) return number is
+v_sal emp.sal%type;
+begin
+  select (sal+nvl(comm,0))*13 into v_sal from emp where empno=No;
+  return v_sal;
+end;
+
+三、————包package
+1、概念
+   包用于在逻辑上组合过程和函数,它由包规范和包体两部分组成。
+①使用create package 命令来创建包:
+     create or replace package sp_package is
+     procedure sp_pro3 (employno emp.empno%type);
+     function  get_salary(Dept_no number) return number;
+     end;
+ ②使用create package body 建立包体:
+create or replace package body sp_package is
+procedure sp_pro1(Nempno emp.empno%type) is
+v_sal emp.sal%type;
+begin
+  select sal into v_sal from emp where empno=Nempno;
+  if v_sal>2000 then
+  update emp set sal=v_sal+50 where empno=Nempno;
+  elsif v_sal>1000 then
+  update emp set sal=v_sal+100 where empno=Nempno;
+  else
+  update emp set sal=v_sal+150 where empno=Nempno;
+  end if;
+end;
+create or replace function nx(No number) return number is
+v_sal emp.sal%type;
+begin
+  select (sal+nvl(comm,0))*13 into v_sal from emp where empno=No;
+  return v_sal;
+end;
+end;
+
+
+1、编写一个存储过程，根据工号删除员工。
+然后提示“**员工已经被删除”，**表示员工姓名。
+
+create or replace procedure deng(v_empno emp.empno%type) is
+v_ename emp.ename%type;
+begin
+ select ename into v_ename from emp where empno=v_empno;
+ delete from emp where empno=v_empno;
+ dbms_output.put_line(v_ename||'员工已经被删除');
+end;
+/
+
+exec deng(7566);
+call deng(7566);
+
+2、写一个函数，传入员工编号，返回所在部门的名称。
+create or replace function deng_1(v_empno emp.empno%type) return dept.dname%type
+is
+v_dname dept.dname%type;
+begin
+select d.dname into v_dname from emp e,dept d 
+where e.deptno=d.deptno and e.empno=v_empno;
+return v_dname;
+end deng_1;
+
+3、编写一个存储过程以检查输入的雇员他的薪水是否有效范围内。不同职位的薪水范围为：
+   Designation  Raise
+   Clerk       1500-2500
+   Salesman    2501-3500
+   Analyst     3501-4500
+   Others      4501 and above.
+如果薪水在此范围内，则显示消息"Salary is OK"，否则，更新薪水为该范围内的最小值。
+create or replace procedure deng_2(v_ename emp.ename%type) is
+v_sal emp.sal%type;
+v_job emp.job%type;
+begin
+select sal,job into v_sal,v_job from emp where ename=v_ename;
+if v_job='CLERK' then
+  if v_sal>=1500 and v_sal<2500 then
+  dbms_output.put_line('Salary is OK');
+  else
+  update emp set sal=1500 where ename=v_ename;
+  dbms_output.put_line('以更改为最小值');
+  end if;
+elsif v_job='SALESMAN' then
+	if v_sal>=2501 and v_sal<3500 then
+	dbms_output.put_line('Salary is OK');
+	else
+	update emp set sal=2500 where ename=v_ename;
+	dbms_output.put_line('以更改为最小值');
+	end if;
+elsif v_job='ANALYST' then
+	if v_sal>=3501 and v_sal<4500 then
+	dbms_output.put_line('Salary is OK');
+	else
+	update emp set sal=3501 where ename=v_ename;
+	dbms_output.put_line('以更改为最小值');
+	end if;
+else
+	if v_sal>=4501 then
+	dbms_output.put_line('Salary is OK');
+	else
+	update emp set sal=4501 where ename=v_ename;
+	dbms_output.put_line('以更改为最小值');
+	end if;
+end if;	
+end;
+
+
+create or replace procedure deng_2(v_ename emp.ename%type) is
+v_sal emp.sal%type;
+v_job emp.job%type;
+begin
+select sal,job into v_sal,v_job from emp where ename=v_ename;
+if v_job='CLERK' and (v_sal>=1500 and v_sal<2500) then
+  dbms_output.put_line('Salary is OK');
+else
+	update emp set sal=3501 where ename=v_ename;
+	dbms_output.put_line('以更改为最小值');
+end if;
+
+--写一个函数，输入一个员工名字，判断该名字在员工表中是否存在，存在返回1，不存在返回0。
+create or replace function fun1(v_ename emp.ename%type) return number 
+is
+n number;
+begin
+  select count(*) into n from emp where ename = v_ename;
+  if n = 0 then 
+     return n;
+  else
+     n := 1;
+     return n;
+  end if;
+end fun1;
+
+--包
+--概念
+   包用于在逻辑上组合过程和函数,它由包规范和包体两部分组成。
+   
+1、创建包规范
+    package
+2、包体
+    package body
+    
+例:
+--第一步： 创建包规范。
+create or replace package p_deng 
+is
+procedure deng(v_empno emp.empno%type);
+function deng_1(v_empno emp.empno%type) return dept.dname%type;
+end;
+
+--第二步：创建包体
+create or replace package body  p_deng 
+is
+procedure deng(v_empno emp.empno%type) is
+v_ename emp.ename%type;
+begin
+ select ename into v_ename from emp where empno=v_empno;
+ delete from emp where empno=v_empno;
+ dbms_output.put_line(v_ename||'员工已经被删除');
+end;
+function deng_1(v_empno emp.empno%type) return dept.dname%type
+is
+v_dname dept.dname%type;
+begin
+select d.dname into v_dname from emp e,dept d 
+where e.deptno=d.deptno and e.empno=v_empno;
+return v_dname;
+end deng_1;
+end;
+
+exec p_deng.deng(1000);
+select p_deng.deng_1(7900) from dual;
+
+
+create or replace package pack_1 is
+procedure deng(v_empno emp.empno%type);
+procedure deng_2(v_ename emp.ename%type);
+function fun1(v_ename emp.ename%type) return number; 
+function deng_1(v_empno emp.empno%type) return dept.dname%type;
+end;
+
+create or replace package body pack_1 is
+procedure deng_2(v_ename emp.ename%type) is
+v_sal emp.sal%type;
+v_job emp.job%type;
+begin
+select sal,job into v_sal,v_job from emp where ename=v_ename;
+if v_job='CLERK' then
+  if v_sal>=1500 and v_sal<2500 then
+  dbms_output.put_line('Salary is OK');
+  else
+  update emp set sal=1500 where ename=v_ename;
+  dbms_output.put_line('以更改为最小值');
+  end if;
+elsif v_job='SALESMAN' then
+	if v_sal>=2501 and v_sal<3500 then
+	dbms_output.put_line('Salary is OK');
+	else
+	update emp set sal=2500 where ename=v_ename;
+	dbms_output.put_line('以更改为最小值');
+	end if;
+elsif v_job='ANALYST' then
+	if v_sal>=3501 and v_sal<4500 then
+	dbms_output.put_line('Salary is OK');
+	else
+	update emp set sal=3501 where ename=v_ename;
+	dbms_output.put_line('以更改为最小值');
+	end if;
+else
+	if v_sal>=4501 then
+	dbms_output.put_line('Salary is OK');
+	else
+	update emp set sal=4501 where ename=v_ename;
+	dbms_output.put_line('以更改为最小值');
+	end if;
+end if;	
+end;
+procedure deng(v_empno emp.empno%type) is
+v_ename emp.ename%type;
+begin
+ select ename into v_ename from emp where empno=v_empno;
+ delete from emp where empno=v_empno;
+ dbms_output.put_line(v_ename||'员工已经被删除');
+end;
+function deng_1(v_empno emp.empno%type) return dept.dname%type
+is
+v_dname dept.dname%type;
+begin
+select d.dname into v_dname from emp e,dept d 
+where e.deptno=d.deptno and e.empno=v_empno;
+return v_dname;
+end deng_1;
+function fun1(v_ename emp.ename%type) return number 
+is
+n number;
+begin
+  select count(*) into n from emp where ename = v_ename;
+  if n = 0 then 
+     return n;
+  else
+     n := 1;
+     return n;
+  end if;
+end fun1;
+end;
+
+
+
+
+
+
+
+
+
+
+
+
+

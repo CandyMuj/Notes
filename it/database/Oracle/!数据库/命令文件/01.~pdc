@@ -1,0 +1,30 @@
+
+select avg(sal) "平均工资",deptno "部门编号" from emp group by deptno;
+
+
+select avg(e.sal) "平均工资",e.deptno "部门编号",d.dname "部门名称" 
+from emp e,dept d 
+where e.deptno = d.deptno 
+group by e.deptno;
+
+--查询每个部门的名称编号和平均工资
+select avg(e.sal) "平均工资",e.deptno "部门编号",(select dname from dept where deptno=e.deptno) "部门名称"
+from emp e,dept d 
+where e.deptno = d.deptno 
+group by e.deptno;
+
+--左外查询
+select ename,dname from emp left join dept on emp.deptno=dept.deptno;
+
+--显示工资低于2000，部门平均工资低于1000的部门号和部门平均工资
+select deptno,avg(sal)
+from emp
+where sal<2000
+group by deptno
+having avg(sal)<1000;
+
+--表达式匹配函数
+ select ename,decode(sign(sal-1000),1,'大于一千',-1,'<1000',0,'等于零') from emp;
+
+
+

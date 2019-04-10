@@ -1,0 +1,30 @@
+--序列
+create sequence seq1
+start with 1
+increment by 1
+maxvalue 100
+minvalue 1
+cycle
+cache 10;
+
+create table stu(
+id number primary key,
+name varchar2(5)
+);
+
+insert into stu values(seq1.nextval,'AA');
+insert into stu values(seq1.nextval,'BB');
+insert into stu values(seq1.nextval,'CC');
+--同义词
+grant create  synonym to scott;--赋创建私有同义词的权限
+create synonym em for scott.emp;
+/*在scott下创建emp表的私有同义词em, 只能scott用户使用*/
+
+grant create public synonym to scott;--赋创建公有同义词的权限，"public synonym"
+create public synonym em for scott.emp;
+/*在scott下创建emp表的公有同义词em，所有用户都可以访问*/
+
+--事务
+savepoint 保存点名字 --保存点
+rollback to 保存点; --事务回滚
+commit;--提交

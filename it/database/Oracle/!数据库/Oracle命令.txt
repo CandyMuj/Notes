@@ -1,0 +1,129 @@
+大部分都是通过查Oracle内置的表或者视图，也可以称这些内置的表或视图是数据字典，记录了很多系统信息
+
+断开连接：disconnect;
+断开当前用户连接：disc 用户名；	
+
+查看当前的实例名：select name from v$database;
+		select instance_name from v$instance;
+		show parameter instance;
+
+更改日期格式:alter session set nls_date_format =’yyyy-mm-dd’;
+
+打开sql*plus的输出功能： set serveroutput on; 这样才能看到输出的内容
+
+Oracle中的25中预定义异常：select * from dba_source where name='STANDARD' and text like '%EXCEPTION_INIT%';
+
+查看已有的函数名称：
+格式化字段长度，避免出现自动换行的情况：col object_name format a60;
+select object_name,object_id,object_type from user_procedures order by object_type;
+
+查看已有函数的源脚本（源码）：
+col name format a15;
+col text format a80;
+select name,line,text from user_source where name='DEMO';
+
+删除函数：drop function name
+修改函数：创建时使用or replace 覆盖（替换）原有的函数，以达到修改函数的目的
+
+查询当前用户下的所有视图：select view_name from user_views;
+当查询出来的某字段列宽不够时可以使用此语句改变某字段宽度（格式化字段长度）：col 字段名 format a15;
+
+查询表所有的约束：
+select constraint_name,table_name,r_owner,r_constraint_name
+from user_constraints
+where table_name='指定要查哪一种表';
+
+打开输出设置：set serveroutput on;
+
+查看存储过程的脚本：select * form user_source where name ='test' order by line;
+
+显示存储过程的错误:show errors procedure '过程名';
+
+删除存储过程：drop procedure [schema.] procedure_name
+
+查看已有触发器的名称：select object_name from user_objects where object_type ='TRIGGER';
+根据名称查看触发器源代码：select * from user_source where name ='触发器名称' order by line;
+
+给用户robbie赋予查看dept表的权限
+grant select on DEPT to robbie; 
+
+将所有表的访问权限赋予给robbie.
+grant select any table to robbie;  
+
+给用户robbie赋予dept的所有操作权限（增删改等操作都可以）
+grant all on dept to robbie;
+
+小技巧,批量生成赋权语句，如果没有select any table的话，在其他时候没有批量语句，就可以用这种思路拼接生成语句
+select 'grant select on '||tname||' to robbie;' from tab;
+（tab视图和表等，你也可以换成其他的，如user_tables等，自己根据情况查询拼接）
+
+查询当前用户所有的表和视图的名字和类型（类型：表，视图或者有其他的）
+select * from tab;
+
+查询当前用户所有表的详细信息（只查得到表，如表名，所有者）
+select * from user_tables;
+
+查询所有用户所有表的详细信息
+select * from all_tables;
+
+-------------- 查询oracle表的信息（表，字段，约束，索引）--------------
+
+1、查询出所有的用户表
+select   *   from   user_tables   可以查询出所有的用户表
+2、查询出用户所有表的索引
+select   *   from   user_indexes
+3、查询用户表的索引(非聚集索引): 
+select   *   from   user_indexes where   uniqueness='NONUNIQUE'
+4、查询用户表的主键(聚集索引): 
+select   *   from   user_indexes where   uniqueness='UNIQUE' 
+5、查询表的索引
+select t.*,i.index_type from user_ind_columns t,user_indexes i where t.index_name = i.index_name and
+t.table_name='NODE'
+6、查询表的主键
+select cu.* from user_cons_columns cu, user_constraints au where cu.constraint_name = au.constraint_name and
+au.constraint_type = 'P' AND cu.table_name = 'NODE'
+7、查询表的所有约束信息（也可以通过视图 user_cons_columns/ALL_CONS_COLUMNS 也有约束的信息）
+查询当前用户的约束信息
+select table_name,constraint_name,constraint_type,status from user_constraints where table_name='大写的表名' 
+查询所有用户的约束信息
+SELECT constraint_name, table_name, r_owner, r_constraint_name 
+FROM all_constraints 
+WHERE table_name = 'table_name' and owner = 'owner_name'; 
+8、查找表的唯一性约束（包括名称，构成列）： 
+select column_name from user_cons_columns cu, user_constraints au where cu.constraint_name=au.constraint_name and
+cu.table_name='NODE'
+9、查找表的外键
+select * from user_constraints c where c.constraint_type = 'R' and c.table_name='STAFFPOSITION'
+查询外键约束的列名： 
+select * from user_cons_columns cl where cl.constraint_name = 外键名称
+查询引用表的键的列名：
+select * from user_cons_columns cl where cl.constraint_name = 外键引用表的键名
+10、查询表的所有列及其属性
+select t.*,c.COMMENTS from user_tab_columns t,user_col_comments c where t.table_name='NODE'
+
+--------------------------------------------------------------------------
+
+--SELECT INTO 和 INSERT INTO SELECT 两种表复制语句
+--Insert是T-sql中常用语句，Insert INTO table(field1,field2,...) values(value1,value2,...)这种形式的在应用程序开发中必不可少。但我们在开发、测试过程中，经常会遇到需要表复制的情况，如将一个table1的数据的部分字段复制到table2中，或者将整个table1复制到table2中，这时候我们就要使用SELECT INTO 和 INSERT INTO SELECT 表复制语句了。
+1.INSERT INTO SELECT语句
+      语句形式为：Insert into Table2(field1,field2,...) select value1,value2,... from Table1
+
+      要求目标表Table2必须存在，由于目标表Table2已经存在，所以我们除了插入源表Table1的字段外，还可以插入常量。
+
+2.SELECT INTO FROM语句
+      语句形式为：SELECT vale1, value2 into Table2 from Table1
+
+      要求目标表Table2不存在，因为在插入时会自动创建表Table2，并将Table1中指定字段数据复制到Table2中。
+
+3、创建序列
+CREATE SEQUENCE  NEWIRMS.EOMS_ADJUST_FILEXML_SEQ  --序列名
+INCREMENT BY 1   -- 每次加几个  
+START WITH 1     -- 从1开始计数  
+NOMAXVALUE       -- 不设置最大值  
+NOCYCLE          -- 一直累加，不循环  
+CACHE 10;
+
+
+
+
+

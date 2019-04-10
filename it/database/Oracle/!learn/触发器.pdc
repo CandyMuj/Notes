@@ -1,0 +1,224 @@
+--dml触发器(insert, update, delete)
+--(1) after
+例：在emp添加一条数据的时候，提示‘添加了一条数据’
+create or replace trigger trig1
+after insert
+on scott.emp
+begin
+  dbms_output.put_line('添加了一条数据');
+end;
+/
+
+--(2) after
+例：在emp修改了多条数据的时候，提示‘多次修改了数据’
+create or replace trigger trig1
+after update
+on scott.emp
+for each row --行级出发，触发一次，引起多行提示
+begin
+  dbms_output.put_line('多次修改了数据');
+end;
+/
+
+--(3)before语句触发器
+例如：为了禁止工作人员在休息一改变员工信息，
+开发人员可以建立before语句触发器，从而实现数据的安全。
+
+create or replace trigger trig1
+before update
+on scott.emp
+begin
+  if  to_char(sysdate,'day') = '星期一'  then
+  raise_application_error(-20000,'周一不能修改数据!'); --抛出异常的过程,拦截不让执行
+  /*
+  说明：
+raise_application_error （error_number_in，error_msg_in）
+  是oracle提供的一个抛出异常的过程,可以传入两个参数。
+error_number_in【自定义】从-20000到-20999之间，这样就不会与oracle的任何错误代码发生冲突。
+error_msg_in【自定义】长度不能超过2K，否则截取2K。错误提示
+
+  */
+  end if;
+end;
+
+（4）使用条件谓词,精确提示用户的操作。
+   当触发器中同时包含多个触发事件（insert,update,delete）时，为了在触发器代码中区分具体的触发事件，可以使用三个条件
+inserting
+updating
+deleting
+
+例：为了禁止工作人员在周一改变员工信息，
+开发人员可以建立before触发器，从而实现数据的安全，
+在给出提示时，明确提示用户是进行的insert,update还是delete的操作。
+
+create or replace trigger trig1
+before update or insert or delete
+on scott.emp
+begin
+  
+  if  to_char(sysdate,'day') = '星期一'  then
+    
+    if updating then
+    raise_application_error(-20000,'周一不能修改数据!'); 
+    end if;
+    
+    if inserting then
+    raise_application_error(-20001,'周一不能添加数据!'); 
+    end if;
+  
+    if deleting then
+    raise_application_error(-20002,'周一不能删除数据!'); 
+    end if;
+  end if;
+end;
+
+(5)使用:old和:new
+  当触发器被触发时，要使用被插入、更新或删除的记录中的列值，
+  有时要使用操作前、后列的值。
+:new 修饰符访问操作完成后列的值
+:old 修饰符访问操作完成前列的值
+
+/*语句级触发器：没有有for each row语句，在
+begin代码段中不可以使用:new和:old。*/
+
+        :old       :new
+insert  null         ok
+update  ok           ok
+delete  ok           null
+
+例：在修改emp表雇员的薪水时，显示雇员工资修改前和修改后的值；
+并确保修改员工的工资不能低于原有工资；
+
+create or replace trigger trig1
+before update
+on scott.emp
+for each row
+begin
+  if :new.sal < :old.sal and :new.sal > :old.sal*1.2 then
+    raise_application_error(-20000,'工资不能比原来的工资低!'); 
+  else
+    dbms_output.put_line('修改前的工资是：'||:old.sal||'，修改后的工资是：'||:new.sal);
+  end if;
+end;
+
+练习
+编写一个触发器如何控制员工的新工资不能低于原来的工资，
+同时也不能高出原来工资的20%。
+
+--instead of 触发器
+create table student (sno number, sname varchar2(10), sage number);
+insert into student values(1,'Tom' ,20);  
+insert into student values(2,'Kite' ,21);
+insert into student values(3,'Bob' ,22); 
+insert into student values(4,'Mike',22);
+insert into student values(5,'Sam',23);
+
+create table address (sno number, zz varchar2(10));
+insert  into address values(1,'郑州'); 
+insert  into address values(2,'开封');
+insert  into address values(3,'洛阳'); 
+insert  into address values(4,'新乡');
+insert  into address values(5,'许昌');
+
+create or replace view view_stu_add
+as
+select s.sno, s.sname, s.sage, a.zz
+From student s, address a
+Where s.sno = a.sno;
+
+/*Update进行更新时，是先删除原来的记录，再插入新的记录。
+所以使用instead of 触发器更新时，先删除原来的记录，再插入要修改的记录。*/
+
+update view_stu_add set zz = '漯河' where sname = 'Kite';
+ORA-01779: 无法修改与非键值保存表对应的列
+
+create or replace trigger trig1
+instead of update
+on view_stu_add
+for each row
+declare
+  a number := 0;
+begin
+  select sno into a from student where sname = :old.sname;
+  delete from address where sno = a;
+  insert into address values (a,:new.zz);
+end;
+/
+--系统触发器
+
+ 1、在sys下先创建一张新表log_table
+
+create table log_table(
+   username varchar2(20), --登录的用户名
+   logon_time date, --登录时间
+   logoff_time date, --退出时间
+   address varchar2(20)  --登录ip
+);
+
+ 2、创建登录触发器
+ create or replace trigger tri8
+ after logon on database
+ begin
+   insert into log_table(username,logon_time,address) 
+   values(ora_login_user,sysdate,ora_client_ip_address);
+ end;
+ 
+ 3、创建退出触发器
+ create or replace trigger tri9
+ before logoff on database
+ begin
+   insert into log_table(username,logoff_time,address) 
+   values(ora_login_user,sysdate,ora_client_ip_address);
+ end;
+ 
+--ddl触发器
+--案例：编写一个触发器，可以记录某个用户进行的ddl操作
+ 1、创建一张表
+create table my_ddl(
+event varchar2(64),  --create，alter，drop事件
+username varchar2(64), --用户名
+ddl_time date          --用户操作的时间
+);
+
+  2、创建触发器
+create or replace trigger tri10
+after ddl on scott.schema
+begin
+ insert into my_ddl values(ora_sysevent,ora_login_user,sysdate);
+end;
+
+——常用的属性函数：
+ora_client_ip_address //返回客户端的ip
+ora_database_name //返回数据库名
+ora_login_user //返回登录用户名
+ora_sysevent //返回触发触发器的系统事件名
+ora_des_encrypted_password //返回用户des（md5）加密后的密码
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,153 @@
+--%type
+declare
+Nename emp.ename%type; --Nename和emp表中ename字段的数据类型一致
+Nsal  emp.sal%type;
+begin
+  select ename, sal into Nename, Nsal from emp where empno = &no;
+  dbms_output.put_line(Nename||'--'||Nsal);
+end;
+/
+
+--%rowtype
+表示该类型为行数据类型，存储的是一行数据，一行数据里可以有多列，
+类似于表里的一行数据，也可以是游标里的一行数据，如：
+   vs_row1  表%rowtype;
+   vs_row2  游标%rowtype;
+--输入雇员编号，输出名字，工资，部门号，上级编号
+
+declare
+Nemp emp%rowtype;
+begin
+  select * into Nemp from emp where empno = &no;
+  dbms_output.put_line(Nemp.ename||'-'||Nemp.sal);
+end;
+/
+--if
+/*输入一个数字判断，如果大于10，输出‘该数字大于10’
+如果小5 输出‘该数字小于5’
+如果5-10 输出‘该数字介于5和10之间’*/
+
+declare
+cou number;
+cou :=&no;--error
+begin
+
+declare
+cou number :=&no;
+begin
+  
+
+declare
+cou number;
+begin
+  cou :=&no;
+  if cou>10 then
+  dbms_output.put_line('该数字大于10!');
+  elsif cou<5 then
+  dbms_output.put_line('该数字小于5!');
+  else
+  dbms_output.put_line('该数字介于5和10之间');
+  end if;
+end;
+/
+
+Declare
+      outgrade varchar2(20);
+Begin
+       outgrade := case  '&grade'
+              when 'A'  then  '优秀'
+              when 'B'  then  '良好'
+              when 'C'  then  '中等'
+              when 'D'  then  '及格'
+              when 'E'  then  '不及格'
+              else        '没有此成绩'
+      end;--end表示结束case语句
+      dbms_output.put_line(outgrade);
+End;
+
+--循环
+LOOP   -   无条件循环
+WHILE  -  根据条件循环
+FOR  -  循环固定的次数
+
+1、loop循环
+ 
+格式:
+Loop
+  循环的语句；
+exit when 终止条件;
+  循环的条件必须更改;
+end loop;
+--显示1-10数字
+declare
+cou number;
+begin
+  cou := 1;
+  loop 
+    dbms_output.put_line(cou);
+    cou := cou + 1;
+  exit when cou>10;    
+  end loop;
+end;
+/
+
+
+declare
+cou number;
+begin
+  cou := 1;
+  loop 
+    dbms_output.put_line(cou);
+  exit when cou>9; --不要忘了分号
+    cou := cou + 1;   
+  end loop; --end loop;结束
+end;
+/
+--格式：
+while(判断循环的条件) loop
+ 循环语句;
+ 循环条件改变;
+end loop;
+
+declare
+cou number;
+begin
+  cou := 1;
+  while cou<11 loop
+    dbms_output.put_line(cou);
+    cou := cou + 1;
+  end loop;
+end;
+/
+
+3、for循环(主要用于游标)
+
+--格式:
+for 变量名 in 变量的初始值..结束值 loop
+  循环语句;
+end loop;
+
+declare
+cou number;
+begin
+   for cou in 1..10 loop
+     dbms_output.put_line(cou);
+   end loop;
+end;
+/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,133 @@
+--pl/sql模块
+--根据输入的员工编号，输出员工姓名
+declare  --声明变量
+Nename varchar2(20);  --变量名 数据类型（ 长度）;
+begin
+  select ename into Nename from emp where empno = &员工编号;--&从控制台输入信息
+  dbms_output.put_line(Nename); --输出的是变量不能是ename
+  /*dbms_output程序包名字,put_line输出过程的名字*/
+end;
+/
+
+打开默认服务：set serveroutput on;
+--根据输入的员工编号，输出员工姓名,工资
+declare
+Nename varchar2(20);
+Nsal number;
+begin
+  select ename, sal into Nename, Nsal from emp where empno = &no;
+  dbms_output.put_line('员工姓名：'||Nename||' 工资是：'||Nsal);
+exception  --例外处理
+  when no_data_found  then   --no_data_found 例外名字
+  dbms_output.put_line('您输入的员工不存在！');
+end;
+/
+
+--输入员工姓名，输出部门编号和上级姓名
+declare
+Nno number;
+Nename varchar2(20);
+begin
+  select e1.deptno, e2.ename into Nno, Nename
+  from emp e1, emp e2
+  where e1.mgr = e2.empno and e1.ename = upper('&员工姓名');
+  dbms_output.put_line('部门号是：'||Nno||' 上级是：'||Nename);
+exception
+  when no_data_found  then   --no_data_found 例外名字  others其他例外
+  dbms_output.put_line('您输入的员工不存在！');
+end;
+/
+
+写一个PL/SQL程序块，
+对名字以‘A’或‘S’开始的所有雇员按他们的基本薪水10%给他们加薪。
+begin
+  update emp set sal = sal * 1.1 where ename like 'A%' or ename like 'S%';
+end;
+
+
+
+begin
+  update emp set sal = sal * 1.1
+  where ename = '&name' and (ename like 'A%' or ename like 'S%');
+end;
+
+2、输入一个员工名字，判断该名字在员工表中是否存在，
+存在返回1，不存在返回0。
+declare
+a number;
+begin
+  select count(distinct *) into a from emp where ename = upper('&name');
+  dbms_output.put_line(a);
+exception
+  when no_data_found  then
+  dbms_output.put_line(a);
+end;
+/
+--%type
+declare
+Nename emp.ename%type;--和emp表中的ename字段数据类型和长度一致
+Nsal emp.sal%type;
+begin
+  select ename, sal into Nename, Nsal from emp where empno = &no;
+  dbms_output.put_line('员工姓名：'||Nename||' 工资是：'||Nsal);
+exception  --例外处理
+  when no_data_found  then   --no_data_found 例外名字
+  dbms_output.put_line('您输入的员工不存在！');
+end;
+/
+
+--%rowtype
+表示该类型为行数据类型，存储的是一行数据，
+一行数据里可以有多列，类似于表里的一行数据，也可以是游标里的一行数据，如：
+   vs_row1  表%rowtype;
+   vs_row2  游标%rowtype;
+declare
+Nemp emp%rowtype;
+begin
+  select * into Nemp from emp where empno = &no; --7369
+ /* dbms_output.put_line(Nemp.*);--error */
+  dbms_output.put_line('员工姓名：'||Nemp.ename||' 工资是：'||Nemp.sal);
+exception  --例外处理
+  when no_data_found  then   --no_data_found 例外名字
+  dbms_output.put_line('您输入的员工不存在！');
+end;
+/
+
+   例如：编写一个程序块，接受用户输入一个部门号，
+   从dept表中显示该部门的名称与所在位置。
+declare
+Ndname dept.dname%type;
+Nloc  dept.loc%type;
+begin
+  select dname, loc into Ndname, Nloc from dept where deptno = &no;
+   dbms_output.put_line(Ndname||'--'||Nloc);
+exception
+  when no_data_found then
+  dbms_output.put_line('您输入的部门号不存在！');  
+end;
+/
+
+declare
+Ndept dept%rowtype;
+begin
+  select * into Ndept from dept where deptno = &no;
+  dbms_output.put_line(Ndept.dname||'--'||Ndept.loc);
+exception
+  when no_data_found then
+  dbms_output.put_line('您输入的部门号不存在！');  
+end;
+/
+
+3、根据雇员编号，查出姓名，部门名，工资等级(emp, dept, salgrade)
+
+
+
+
+
+
+
+
+
+
+  
+  

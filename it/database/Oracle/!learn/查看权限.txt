@@ -1,0 +1,17 @@
+1、查看oracle的角色
+select * from dba_roles;
+2、一个角色包含的系统权限
+select * from dba_sys_privs where grantee='CONNECT';
+//select * from role_sys_privs where role='CONNECT';
+一个角色包含的对象权限
+select * from dba_tab_privs where grantee='CONNECT';
+3、查看某个用户具有的角色
+select * from dba_role_privs where grantee='SCOTT';
+
+--查询授权情况，当前用户的哪些表给哪些用户授权了
+--使用scott登录，查询scott的emp表授权情况
+SELECT * FROM user_tab_privs_made t where t.TABLE_NAME=upper('emp');
+
+--可以通过desc查看表结构，了解字段内容
+--user_tab_privs里面就存着授权的信息
+desc sys.user_tab_privs;
