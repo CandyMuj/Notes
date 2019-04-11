@@ -8,3 +8,4 @@ CREATE USER 'test'@'%' IDENTIFIED BY 'xxxxx';
 -- 第二步 授权
 grant select on *.* to 'test'@'%';
 ```
+
