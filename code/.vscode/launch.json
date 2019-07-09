@@ -1,0 +1,16 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - Demo$DemoThreadPool",
+            "request": "launch",
+            "mainClass": "Demo$DemoThreadPool"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - Demo",
+            "request": "launch",
+            "mainClass": "Demo"
+        }
+    ]
+}
