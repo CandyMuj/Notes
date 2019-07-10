@@ -1,3 +1,5 @@
+import util.*;
+
 class Demo {
 
     public static void log(Object... arg) {
