@@ -12,7 +12,6 @@ import java.util.concurrent.Executors;
  * 
  * @Title 线程池
  * @FileName ThreadPool
- * @Description TODO
  * @Author CandyMuj
  * @Date 2019/6/26 10:18
  * @Version 1.0
