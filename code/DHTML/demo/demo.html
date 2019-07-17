@@ -6,13 +6,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>示例文件</title>
+
+    <style>
+        label {
+            font-weight: bolder;
+            color: red;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .maxInput {
+            width: 90%;
+        }
+
+        .item {
+            margin-left: 2em;
+            margin-bottom: 2em;
+        }
+    </style>
 </head>
 
 <script type="text/javascript" src="../c.js"></script>
+<script type="text/javascript" src="../lib/jquery-3.4.1.min.js"></script>
 
 <body>
-    <input data-demoId="demo-001" type="text" placeholder="为空默认可输入小数的正数" onkeyup="C.onlyNum(this)" />
-    <input data-demoId="demo-001" type="text" placeholder="小于或等于0 则为正整数" onkeyup="C.onlyNum(this,0)" />
+    <div>
+        <label>demo-001</label>
+        <div class="item">
+            <input type="text" class="maxInput" placeholder="为空默认可输入两位小数的正数" onkeyup="C.onlyNum(this)" /><br />
+            <input type="text" class="maxInput" placeholder="小于或等于0 则为正整数" onkeyup="C.onlyNum(this,0)" />
+        </div>
+    </div>
+
+    <div>
+        <label>demo-002</label>
+        <div class="item" id="demo-002"> </div>
+    </div>
+
 </body>
+
+<script type="text/javascript">
+
+    /**
+     * demo-002
+     */
+    var demo002 = function () {
+        $('#demo-002').html(C.imghtml('"../img/demo-002.jpg"', enumc.imghtmlStyleType.round));
+    }();
+
+</script>
 
 </html>
