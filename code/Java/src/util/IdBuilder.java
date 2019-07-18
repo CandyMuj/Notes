@@ -178,7 +178,7 @@ public class IDBuilder {
         if (len < 0) {
             len = 0;
         }
-        return Long.toString(new Date().getTime()).substring(4) + IdBuilder.genRandomStr(true, len);
+        return Long.toString(new Date().getTime()).substring(4) + IDBuilder.genRandomStr(true, len);
     }
 
 }
