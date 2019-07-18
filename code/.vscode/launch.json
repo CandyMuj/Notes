@@ -2,6 +2,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - EncryptUtil",
+            "request": "launch",
+            "mainClass": "util.secret.EncryptUtil",
+            "projectName": "Java"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - IDBuilder",
             "request": "launch",
             "mainClass": "util.IDBuilder",
