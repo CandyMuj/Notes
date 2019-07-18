@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.Random;
 
 /*生成id*/
-public class IdBuilder {
+public class IDBuilder {
     public static int seed = 0;
 
     /**
