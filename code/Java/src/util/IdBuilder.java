@@ -165,6 +165,10 @@ public class IDBuilder {
 
     }
 
+    public static String getUUID(){
+		return java.util.UUID.randomUUID().toString().replace("-", "");
+	}
+
     /**
      * 生成唯一的编号（纯数字） - 最小为9位（时间戳） - 默认为18位
      *

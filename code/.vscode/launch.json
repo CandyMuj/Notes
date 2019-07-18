@@ -2,6 +2,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - IDBuilder",
+            "request": "launch",
+            "mainClass": "util.IDBuilder",
+            "projectName": "Java"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - SHAUtil",
             "request": "launch",
             "mainClass": "util.secret.SHAUtil",
