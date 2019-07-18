@@ -1,9 +1,9 @@
-package util.secret;
+package util.secret.encrypt;
 
 /**
- * javaÖ§³ÖµÄ¼ÓÃÜ½âÃÜ <br>
- * µ¥Ïò¼ÓÃÜ£ºMD5¡¢SHA1 <br>
- * Ë«Ïò¼ÓÃÜ£ºDES¡¢AES
+ * javaæ”¯æŒçš„åŠ å¯†è§£å¯† <br>
+ * å•å‘åŠ å¯†ï¼šMD5ã€SHA1 <br>
+ * åŒå‘åŠ å¯†ï¼šDESã€AES
  * 
  * @author linin
  *
@@ -30,7 +30,7 @@ public interface EncryptUtilApi {
 
     String AESdecode(String res, String key);
 
-    // ------Òì»ò¼ÓÃÜ-----//
+    // ------å¼‚æˆ–åŠ å¯†-----//
     String XORencode(String res, String key);
 
     String XORdecode(String res, String key);

@@ -1,4 +1,4 @@
-package util.secret;
+package util.secret.encrypt;
 
 import java.security.MessageDigest;
 import java.security.SecureRandom;
@@ -10,10 +10,10 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * javaÖ§³ÖµÄ¼ÓÃÜ½âÃÜ <br>
- * µ¥Ïò¼ÓÃÜ£ºMD5¡¢SHA1 <br>
- * Ë«Ïò¼ÓÃÜ£ºDES¡¢AES <br>
- * ×¢Òâ£º±¾¹¤¾ßÀà²»Ê¹ÓÃBase64×ª×Ö·û´®£¬¶øÊÇÖ±½Ó½«byte[]×ªÎª16½øÖÆ×Ö·û´®
+ * javaæ”¯æŒçš„åŠ å¯†è§£å¯† <br>
+ * å•å‘åŠ å¯†ï¼šMD5ã€SHA1 <br>
+ * åŒå‘åŠ å¯†ï¼šDESã€AES <br>
+ * æ³¨æ„ï¼šæœ¬å·¥å…·ç±»ä¸ä½¿ç”¨Base64è½¬å­—ç¬¦ä¸²ï¼Œè€Œæ˜¯ç›´æ¥å°†byte[]è½¬ä¸º16è¿›åˆ¶å­—ç¬¦ä¸²
  * 
  * @author linin
  *
@@ -21,9 +21,9 @@ import javax.crypto.spec.SecretKeySpec;
 public class EncryptUtil implements EncryptUtilApi {
 
     public static void main(String... arg) {
-        String res = "²âÊÔtest";
-        String key = "ÃØÔ¿key";
-        String mw = "ÃÜÎÄ£¬ÁÙÊ±ÓÃµÄ";
+        String res = "æµ‹è¯•test";
+        String key = "ç§˜é’¥key";
+        String mw = "å¯†æ–‡ï¼Œä¸´æ—¶ç”¨çš„";
         System.out.println("--MD5--");
         System.out.println(EncryptUtil.getInstance().MD5(res));
         System.out.println(EncryptUtil.getInstance().MD5(res, key));
@@ -39,14 +39,14 @@ public class EncryptUtil implements EncryptUtilApi {
         System.out.println(mw);
         System.out.println(EncryptUtil.getInstance().AESdecode(mw, key));
 
-        System.out.println("--Òì»ò¼ÓÃÜ--");
+        System.out.println("--å¼‚æˆ–åŠ å¯†--");
         mw = EncryptUtil.getInstance().XORencode(res, key);
         System.out.println(mw);
         System.out.println(EncryptUtil.getInstance().XORdecode(mw, key));
         int i = 12345;
         int ii = EncryptUtil.getInstance().XOR(i, key);
         int iii = EncryptUtil.getInstance().XOR(ii, key);
-        System.out.println(String.format(i + "Òì»òÒ»´Î£º%s£»Òì»òÁ½´Î£º%s",ii,iii )); 
+        System.out.println(String.format(i + "å¼‚æˆ–ä¸€æ¬¡ï¼š%sï¼›å¼‚æˆ–ä¸¤æ¬¡ï¼š%s", ii, iii));
     }
 
     public static final String MD5 = "MD5";
@@ -56,7 +56,7 @@ public class EncryptUtil implements EncryptUtilApi {
     public static final String DES = "DES";
     public static final String AES = "AES";
 
-    /** ±àÂë¸ñÊ½£»Ä¬ÈÏnullÎªGBK*/ 
+    /** ç¼–ç æ ¼å¼ï¼›é»˜è®¤nullä¸ºGBK */
     public String charset = null;
     /** DES */
     public int keysizeDES = 0;
@@ -65,7 +65,7 @@ public class EncryptUtil implements EncryptUtilApi {
     public static EncryptUtil me;
 
     private EncryptUtil() {
-        // µ¥Àı
+        // å•ä¾‹
     }
 
     public static EncryptUtil getInstance() {
@@ -75,7 +75,7 @@ public class EncryptUtil implements EncryptUtilApi {
         return me;
     }
 
-    /** Ê¹ÓÃMessageDigest½øĞĞµ¥Ïò¼ÓÃÜ£¨ÎŞÃÜÂë£©*/ 
+    /** ä½¿ç”¨MessageDigestè¿›è¡Œå•å‘åŠ å¯†ï¼ˆæ— å¯†ç ï¼‰ */
     private String messageDigest(String res, String algorithm) {
         try {
             MessageDigest md = MessageDigest.getInstance(algorithm);
@@ -87,7 +87,7 @@ public class EncryptUtil implements EncryptUtilApi {
         return null;
     }
 
-    /** Ê¹ÓÃKeyGenerator½øĞĞµ¥Ïò/Ë«Ïò¼ÓÃÜ£¨¿ÉÉèÃÜÂë£©*/ 
+    /** ä½¿ç”¨KeyGeneratorè¿›è¡Œå•å‘/åŒå‘åŠ å¯†ï¼ˆå¯è®¾å¯†ç ï¼‰ */
     private String keyGeneratorMac(String res, String algorithm, String key) {
         try {
             SecretKey sk = null;
@@ -108,9 +108,7 @@ public class EncryptUtil implements EncryptUtilApi {
         return null;
     }
 
-    /**
-     * Ê¹ÓÃKeyGeneratorË«Ïò¼ÓÃÜ£¬DES/AES£¬×¢ÒâÕâÀï×ª»¯Îª×Ö·û´®µÄÊ±ºòÊÇ½«2½øÖÆ×ªÎª16½øÖÆ¸ñÊ½µÄ×Ö·û´®£¬²»ÊÇÖ±½Ó×ª£¬ÒòÎª»á³ö´í*/
-     
+    /** ä½¿ç”¨KeyGeneratoråŒå‘åŠ å¯†ï¼ŒDES/AESï¼Œæ³¨æ„è¿™é‡Œè½¬åŒ–ä¸ºå­—ç¬¦ä¸²çš„æ—¶å€™æ˜¯å°†2è¿›åˆ¶è½¬ä¸º16è¿›åˆ¶æ ¼å¼çš„å­—ç¬¦ä¸²ï¼Œä¸æ˜¯ç›´æ¥è½¬ï¼Œå› ä¸ºä¼šå‡ºé”™ */
     private String keyGeneratorES(String res, String algorithm, String key, int keysize, boolean isEncode) {
         try {
             KeyGenerator kg = KeyGenerator.getInstance(algorithm);
@@ -140,11 +138,11 @@ public class EncryptUtil implements EncryptUtilApi {
         return null;
     }
 
-    private String base64(byte[] res) throws Exception {
-        return Base64Utils.encode(res);
+    private String base64(byte[] res) {
+        return Base64.encode(res);
     }
 
-    /** ½«¶ş½øÖÆ×ª»»³É16½øÖÆ */
+    /** å°†äºŒè¿›åˆ¶è½¬æ¢æˆ16è¿›åˆ¶ */
     public static String parseByte2HexStr(byte buf[]) {
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < buf.length; i++) {
@@ -157,7 +155,7 @@ public class EncryptUtil implements EncryptUtilApi {
         return sb.toString();
     }
 
-    /** ½«16½øÖÆ×ª»»Îª¶ş½øÖÆ*/ 
+    /** å°†16è¿›åˆ¶è½¬æ¢ä¸ºäºŒè¿›åˆ¶ */
     public static byte[] parseHexStr2Byte(String hexStr) {
         if (hexStr.length() < 1)
             return null;

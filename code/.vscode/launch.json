@@ -4,6 +4,13 @@
             "type": "java",
             "name": "CodeLens (Launch) - EncryptUtil",
             "request": "launch",
+            "mainClass": "util.secret.encrypt.EncryptUtil",
+            "projectName": "Java"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - EncryptUtil",
+            "request": "launch",
             "mainClass": "util.secret.EncryptUtil",
             "projectName": "Java"
         },
