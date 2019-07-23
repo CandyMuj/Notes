@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.Date;
+import java.util.Calendar;
 
 /**
  * @FileName Methodc
@@ -105,6 +107,10 @@ public class Methodc {
         }
     }
 
+    public static Object[] listToArray(ArrayList<Object> list) {
+        return list != null && list.size() != 0 ? list.toArray(new Object[list.size()]) : null;
+    }
+
     public static String[] ListToArray(ArrayList<String> list) {
         return list != null && list.size() != 0 ? list.toArray(new String[list.size()]) : null;
     }
@@ -119,6 +125,40 @@ public class Methodc {
         return Pattern.compile("0?(13|14|15|17|18|19)[0-9]{9}").matcher(phone).matches();
     }
 
+    /**
+     * date2 比 date1 多的天数
+     *
+     * @param date1
+     * @param date2
+     * @return
+     */
+    public static int differentDays(Date date1, Date date2) {
+        Calendar cal1 = Calendar.getInstance();
+        cal1.setTime(date1);
+
+        Calendar cal2 = Calendar.getInstance();
+        cal2.setTime(date2);
+        int day1 = cal1.get(Calendar.DAY_OF_YEAR);
+        int day2 = cal2.get(Calendar.DAY_OF_YEAR);
+
+        int year1 = cal1.get(Calendar.YEAR);
+        int year2 = cal2.get(Calendar.YEAR);
+        if (year1 != year2) {  // 同一年
+            int timeDistance = 0;
+            for (int i = year1; i < year2; i++) {
+                if (i % 4 == 0 && i % 100 != 0 || i % 400 == 0) {  // 闰年
+                    timeDistance += 366;
+                } else {  // 不是闰年
+                    timeDistance += 365;
+                }
+            }
+
+            return timeDistance + (day2 - day1);
+        } else {  // 不同年
+            System.out.println("判断day2 - day1 : " + (day2 - day1));
+            return day2 - day1;
+        }
+    }
 
     public static void main(String[] s) {
         // System.out.println(dollar2cents(23.6566));
