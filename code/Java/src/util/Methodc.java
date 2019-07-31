@@ -2,11 +2,8 @@ package util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
-import java.util.Date;
-import java.util.Calendar;
 
 /**
  * @FileName Methodc
@@ -160,6 +157,55 @@ public class Methodc {
         }
     }
 
+    /**
+     * 传入一个以逗号分隔的字符串，返回其中分隔的内容的随机值，且这些值不会重复
+     * <p>
+     * 这里为什么要使用两个循环，如果只是实现这种返回的结果是去重的，完全可以用一个循环就解决
+     * Set<String> set = new HashSet<>();
+     * do {
+     * set.add(list.get((int) (Math.random() * llen)));
+     * } while (set.size() < len);
+     * <p>
+     * 将 rIndex 替换为上述的循环，并把第二个循环删除即可
+     *
+     * <p>
+     * 但是可能会出现三种随机场景：
+     * 1、对结果去重
+     * 2、对结果不去重（同一个值可能出现n次）
+     * 3、结果可以重复，但是重复的最大的可能次数为传入字符串中重复的次数
+     * <p>
+     * 前两种方法使用两个和使用一个循环结果一致，且使用一个循环应该还要快一点，当应对第三种场景的时候就只能使用两个循环才能处理
+     * 因为值不可去重，index需要去重，才能保证为最大重复数，如果使用一个循环，那么只能单纯的对结果值进行去重或不去重（即第一二种场景）
+     * 而第三种场景只能通过对初始的值不处理重复，但是index得去重才行。所以一个循环不支持index的是否去重的操作，只最终结果的是否重复操作，所以就不行
+     * <p>
+     * 二者也很好转换，具体使用，根据场景不同灵活变更
+     * ps:一个循环和两个循环的转换方法，注释开头已经说了
+     * 
+     * @param str 以逗号分隔的字符串，也可以直接是list或set，因为我最终也是要转的，看具体情况变更，修改方法参数即可
+     * @param len 随机的结果个数
+     */
+    public static List<String> random(String str, int len) {
+        // 这句代码的思路：先将string转为set，目的是去重；然后再转成list，因为set是无序的，所以我需要通过有序，使用序列来操作获取集合元素。
+        // ps：由于从 字符串->数组->set 只能通过 字符串->数组->借助list生成set  所以要反复转两次的list
+        List<String> list = new ArrayList<>(new HashSet<>(Arrays.asList(str.split(","))));
+        int llen = list.size();
+        if (llen < len) len = llen;
+
+        Set<Integer> rIndex = new HashSet<>();
+        do {
+            rIndex.add((int) (Math.random() * llen));
+        } while (rIndex.size() < len);
+        System.out.println(rIndex);
+
+        List<String> rlist = new ArrayList<>();
+        for (Integer index : rIndex) {
+            rlist.add(list.get(index));
+        }
+        System.out.println(rlist);
+
+        return rlist;
+    }
+
     public static void main(String[] s) {
         // System.out.println(dollar2cents(23.6566));
         // System.out.println(Mathc.noroundDouble(23.6566));
@@ -168,6 +214,8 @@ public class Methodc {
         // sortSelect(arr);
 
         // System.out.println(checkPhone("13666665555"));
+
+        // random("11,23,33,22,23,44,88,332,56", 5);
 
     }
 

@@ -2,6 +2,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - Methodc",
+            "request": "launch",
+            "mainClass": "util.Methodc",
+            "projectName": "Java"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - EncryptUtil",
             "request": "launch",
             "mainClass": "util.secret.encrypt.EncryptUtil",
