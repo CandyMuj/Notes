@@ -76,3 +76,9 @@ show engines;
 show variables like '%storage_engine%';
 ```
 
+##  修改MySQL自动递增值
+
+``` mysql
+alter table tablename auto_increment = num
+```
+
