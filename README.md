@@ -17,10 +17,10 @@
 * [11_运算符](/it/Python/基础/11_运算符.html)
 * [12_循环](/it/Python/基础/12_循环.html)
 * [13_函数基础](/it/Python/基础/13_函数基础.html)
-* [14_高级变量类型](/it/Python/基础/14_高级变量类型.html)
+* [14_高级变量类型](/it/Python/基础/14_高级变量类型.html%20)
 * [15_综合应用 —— 名片管理系统](/it/Python/基础/15_综合应用%20——%20名片管理系统.html)
-* [16_变量进阶](/it/Python/基础/16_变量进阶.html)
-* [17_函数进阶](/it/Python/基础/17_函数进阶.html)
+* [16_变量进阶](/it/Python/基础/16_变量进阶.html%20)
+* [17_函数进阶](/it/Python/基础/17_函数进阶.html%20)
 
 #### [Anaconda3](/it/Python_Anaconda3/)
 
