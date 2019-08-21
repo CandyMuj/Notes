@@ -14,11 +14,7 @@ import java.util.regex.Pattern;
 public class Methodc {
 
     public static ArrayList<String> array2list(String[] array) {
-        ArrayList<String> list = new ArrayList<>();
-        for (String s : array) {
-            list.add(s);
-        }
-        return list;
+        return new ArrayList<>(Arrays.asList(array));
     }
 
     /**
@@ -110,6 +106,32 @@ public class Methodc {
 
     public static String[] ListToArray(ArrayList<String> list) {
         return list != null && list.size() != 0 ? list.toArray(new String[list.size()]) : null;
+    }
+
+	/**
+     * 将list转成字符串
+     *
+     * @param split 指定分隔符
+     * @return
+     */
+    public static String ListToString(List<Integer> list, String split) {
+        if (list == null) return null;
+        StringBuilder str = new StringBuilder();
+        Iterator<Integer> iterator = list.iterator();
+        while (iterator.hasNext()) {
+            str.append(iterator.next()).append(split);
+        }
+
+        if (str.length() > 0) str.deleteCharAt(str.length() - 1);
+
+        return str.toString();
+    }
+
+    /**
+     * 默认以逗号为分隔符
+     */
+    public static String ListToString(List<Integer> list) {
+        return ListToString(list, ",");
     }
 
     /**
@@ -204,6 +226,36 @@ public class Methodc {
         System.out.println(rlist);
 
         return rlist;
+    }
+
+	/**
+     * 通过出生日期获取生日
+     *
+     * @param birthDay
+     * @return
+     * @throws Exception
+     */
+    public static int getAge(Date birthDay) throws Exception {
+        Calendar cal = Calendar.getInstance();
+        if (cal.before(birthDay)) { //出生日期晚于当前时间，无法计算
+            throw new IllegalArgumentException("The birthDay is before Now.It's unbelievable!");
+        }
+        int yearNow = cal.get(Calendar.YEAR);  //当前年份
+        int monthNow = cal.get(Calendar.MONTH);  //当前月份
+        int dayOfMonthNow = cal.get(Calendar.DAY_OF_MONTH); //当前日期
+        cal.setTime(birthDay);
+        int yearBirth = cal.get(Calendar.YEAR);
+        int monthBirth = cal.get(Calendar.MONTH);
+        int dayOfMonthBirth = cal.get(Calendar.DAY_OF_MONTH);
+        int age = yearNow - yearBirth;   //计算整岁数
+        if (monthNow <= monthBirth) {
+            if (monthNow == monthBirth) {
+                if (dayOfMonthNow < dayOfMonthBirth) age--;//当前日期在生日之前，年龄减一
+            } else {
+                age--;//当前月份在生日之前，年龄减一
+            }
+        }
+        return age;
     }
 
     public static void main(String[] s) {
