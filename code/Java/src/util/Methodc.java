@@ -1,5 +1,6 @@
 package util;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.*;
@@ -256,6 +257,18 @@ public class Methodc {
             }
         }
         return age;
+    }
+
+	/**
+	 * 计算文件的md5码，通过输入流
+	 */
+	public static String getFileMd5(InputStream inputStream) {
+        try {
+            return DigestUtils.md5Hex(inputStream);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public static void main(String[] s) {
